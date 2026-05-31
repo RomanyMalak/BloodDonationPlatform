@@ -1,0 +1,17 @@
+.vs/
+bin/
+obj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+*.db
+*.mdf
+*.ldf
+
+appsettings.Development.json
+
+TestResults/
+.vscode/
