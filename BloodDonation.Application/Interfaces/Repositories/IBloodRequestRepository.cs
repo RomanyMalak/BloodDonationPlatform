@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace BloodDonation.Application.Interfaces.Repositories
 {
-    public interface IBloodRequestRepository:IRepository<BloodRequest>
+    public interface IBloodRequestRepository
     {
-        
+        Task<BloodRequest?> GetWithAcceptancesAsync(Guid id);
     }
 }

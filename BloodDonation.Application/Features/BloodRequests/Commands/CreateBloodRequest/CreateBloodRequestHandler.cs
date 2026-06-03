@@ -4,26 +4,21 @@ using BloodDonation.Application.Interfaces.Repositories;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest
 {
     public sealed class CreateBloodRequestHandler
      : IRequestHandler<CreateBloodRequestCommand, CreateBloodRequestResponseDto>
     {
-        private readonly IBloodRequestRepository _bloodRequestRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly  IApplicationDbContext _dbContext;
+       
 
         public CreateBloodRequestHandler(
             IBloodRequestRepository bloodRequestRepository,
-            IUnitOfWork unitOfWork)
+            IApplicationDbContext dbContext)
         {
-            _bloodRequestRepository = bloodRequestRepository;
-            _unitOfWork = unitOfWork;
+            _dbContext= dbContext;
         }
 
         public async Task<CreateBloodRequestResponseDto> Handle(
@@ -49,8 +44,8 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _bloodRequestRepository.AddAsync(bloodRequest);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _dbContext.BloodRequests.AddAsync(bloodRequest);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             // --- هنا لاحقاً هنضيف: await _aiPipeline.RunAsync(bloodRequest); ---
 
