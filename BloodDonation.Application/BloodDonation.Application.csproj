@@ -6,8 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
-    <PackageReference Include="FluentValidation" Version="8.5.1" />
-    <PackageReference Include="MediatR" Version="9.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
   </ItemGroup>
   <ItemGroup>
@@ -15,9 +15,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Features\BloodRequests\Queries\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
   </ItemGroup>
 </Project>
