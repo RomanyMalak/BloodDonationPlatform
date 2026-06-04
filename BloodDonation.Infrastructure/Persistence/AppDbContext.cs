@@ -2,6 +2,7 @@ using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace BloodDonation.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext, IApplicationDbContext
