@@ -3,34 +3,24 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using BloodDonation.API.Middewares;
-using BloodDonation.Application.Interfaces;
-using BloodDonation.Application.Features.Auth.Commands.Register;
-using BloodDonation.Infrastructure.Services;
-using MediatR;
-using FluentValidation;
+using BloodDonation.Application.Extensions;
+using BloodDonation.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//dependency injection
-// 1. تسجيل مكتبة MediatR لقراءة الـ Handlers بتوعك تلقائياً
-builder.Services.AddMediatR(typeof(RegisterCommand).Assembly);
-// 2. تسجيل مكتبة FluentValidation لقراءة الـ Validators بتوعك تلقائياً
-builder.Services.AddValidatorsFromAssembly(typeof(RegisterCommandValidator).Assembly);
-
+//extensions
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 // 3. تسجيل خدمة توليد الـ Token
-builder.Services.AddScoped<IJwtTokenGenerator,JwtTokenGenerator>();
-builder.Services.AddScoped<IApplicationDbContext, AppDbContext>();
+
+builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
 //
 //cors 
 
 
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("BloodDonation.Infrastructure")
-    ));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClientPolicy", policy =>
@@ -79,9 +69,6 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-builder.Services.AddControllers();
-builder.Services.AddSignalR();
-builder.Services.AddEndpointsApiExplorer();
 // Swagger
 builder.Services.AddSwaggerGen(c=>
 {
@@ -95,6 +82,8 @@ builder.Services.AddSwaggerGen(c=>
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
         Name = "Authorization",
+        BearerFormat = "JWT",
+      
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
