@@ -15,6 +15,7 @@ public class BloodRequest
     public string? MedicalDocumentUrl { get; set; }
     public string? Notes { get; set; }
     public string? ContactPhone { get; set; }
+    public int UnitsNeeded { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public Guid PatientId { get; set; }

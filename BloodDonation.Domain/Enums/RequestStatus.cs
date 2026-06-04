@@ -3,8 +3,7 @@ namespace BloodDonation.Domain.Enums;
 public enum RequestStatus
 {
     Pending,
-    Processing,
-    NotificationsSent,
+    Matching,
     Accepted,
     Completed,
     Cancelled

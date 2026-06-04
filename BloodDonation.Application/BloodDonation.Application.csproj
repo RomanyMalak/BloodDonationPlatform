@@ -13,4 +13,11 @@
   <ItemGroup>
     <ProjectReference Include="..\BloodDonation.Domain\BloodDonation.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\BloodRequests\Queries\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+  </ItemGroup>
 </Project>
