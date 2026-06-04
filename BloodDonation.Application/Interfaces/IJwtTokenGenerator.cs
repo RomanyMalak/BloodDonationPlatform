@@ -1,5 +1,4 @@
 ﻿using BloodDonation.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +7,8 @@ using System.Threading.Tasks;
 
 namespace BloodDonation.Application.Interfaces
 {
-    public interface IApplicationDbContext
+    public interface IJwtTokenGenerator
     {
-        DbSet<User> Users { get; }
-
-        Task<int> SaveChangesAsync(
-            CancellationToken cancellationToken);
+        string GenerateToken(User user);
     }
 }
