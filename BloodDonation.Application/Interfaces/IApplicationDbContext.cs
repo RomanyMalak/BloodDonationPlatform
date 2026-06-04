@@ -1,18 +1,15 @@
 ﻿using BloodDonation.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BloodDonation.Application.Interfaces
+namespace BloodDonation.Application.Interfaces;
+
+public interface IApplicationDbContext
 {
-    public interface IApplicationDbContext
-    {
-        DbSet<User> Users { get; }
-
-        Task<int> SaveChangesAsync(
-            CancellationToken cancellationToken);
-    }
+    DbSet<User> Users { get; }
+    DbSet<BloodRequest> BloodRequests { get; }
+    DbSet<BloodRequestAcceptance> BloodRequestAcceptances { get; }
+    DbSet<Hospital> Hospitals { get; }
+    DbSet<Notification> Notifications { get; }
+    DbSet<DonationHistory> DonationHistories { get; }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

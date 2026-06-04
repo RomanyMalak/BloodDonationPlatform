@@ -2,6 +2,7 @@
 using BloodDonation.Application.Interfaces.Repositories;
 using BloodDonation.Infrastructure.Persistence;
 using BloodDonation.Infrastructure.Repositories;
+using BloodDonation.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,16 +15,22 @@ public static class InfrastructureServiceExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Database
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection")));
+                configuration.GetConnectionString("DefaultConnection"),
+                sql =>
+                {
+                    sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                }));
 
-        services.AddScoped<IApplicationDbContext>(sp =>
-            sp.GetRequiredService<AppDbContext>());
+        services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<AppDbContext>());
 
         // Repositories
         services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
+
+        // Services
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }
