@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace BloodDonation.Application.DTOs.BloodRequest;
 
-namespace BloodDonation.Application.DTOs.BloodRequest
+public class BloodRequestSummaryDto
 {
-    internal class BloodRequestSummaryDto
-    {
-    }
+    public Guid Id { get; init; }
+    public string RequiredBloodType { get; init; } = null!;
+    public string Urgency { get; init; } = null!;
+    public string Status { get; init; } = null!;
+    public string? HospitalName { get; init; }
+    public int UnitsNeeded { get; init; }
+    public string? ContactPhone { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime? ExpiresAt { get; init; }
 }
