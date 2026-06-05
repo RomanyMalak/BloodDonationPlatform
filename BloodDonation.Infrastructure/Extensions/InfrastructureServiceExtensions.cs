@@ -15,13 +15,16 @@ public static class InfrastructureServiceExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Database
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection")));
+                configuration.GetConnectionString("DefaultConnection"),
+                sql =>
+                {
+                    sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                }));
 
-        services.AddScoped<IApplicationDbContext>(sp =>
-            sp.GetRequiredService<AppDbContext>());
+        services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<AppDbContext>());
 
         // Repositories
         services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
@@ -30,6 +33,9 @@ public static class InfrastructureServiceExtensions
        //services.AddScoped<IDonorService, DonorService>();
        // services.AddScoped<IDashboardService, DashboardService>();
 
+
+        // Services
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }

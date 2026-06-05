@@ -2,9 +2,11 @@ namespace BloodDonation.Domain.Enums;
 
 public enum RequestStatus
 {
-    Pending,
+    PendingVerification,
+    Approved,
     Matching,
     Accepted,
     Completed,
+    Rejected,
     Cancelled
 }
