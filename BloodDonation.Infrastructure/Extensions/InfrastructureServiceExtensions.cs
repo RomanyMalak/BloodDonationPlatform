@@ -28,10 +28,12 @@ public static class InfrastructureServiceExtensions
 
         // Repositories
         services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
-       services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-       // تسجيل خدمة المتبرعين في السيرفر
-       //services.AddScoped<IDonorService, DonorService>();
-       // services.AddScoped<IDashboardService, DashboardService>();
+        //services 
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        // تسجيل خدمة المتبرعين في السيرفر
+        services.AddScoped<IDonorService, DonorService>();
+        services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
 
         // Services
