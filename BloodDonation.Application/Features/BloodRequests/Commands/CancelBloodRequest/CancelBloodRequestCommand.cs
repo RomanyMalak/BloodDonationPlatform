@@ -5,5 +5,5 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CancelBloodR
 public sealed record CancelBloodRequestCommand : IRequest<bool>
 {
     public Guid BloodRequestId { get; init; }
-    public Guid PatientId { get; init; }
+    public Guid UserId { get; init; }
 }

@@ -34,7 +34,7 @@ public sealed class CreateBloodRequestHandler
             ContactPhone = request.ContactPhone,
             UnitsNeeded = request.UnitsNeeded,
             ExpiresAt = request.ExpiresAt,
-            PatientId = request.PatientId,
+            UserId = request.UserId,
             CreatedAt = DateTime.UtcNow
         };
 
