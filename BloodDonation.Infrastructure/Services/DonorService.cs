@@ -22,7 +22,7 @@ public class DonorService : IDonorService
 
         var requests = await _context.BloodRequests
             .Include(r => r.Hospital)
-            .Where(r => r.Status == RequestStatus.NotificationsSent || r.Status == RequestStatus.Pending)
+            .Where(r => r.Status == RequestStatus.Approved || r.Status == RequestStatus.Matching)
             .ToListAsync();
 
         var result = requests.Select(r =>
