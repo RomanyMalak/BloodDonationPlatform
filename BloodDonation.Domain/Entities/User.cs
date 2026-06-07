@@ -13,8 +13,8 @@ public class User
     public BloodType? BloodType { get; set; }
     public UserRole Role { get; set; }
     public Hospital? Hospital { get; set; }
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
+    public double ? Latitude { get; set; }
+    public double ? Longitude { get; set; }
     public bool IsAvailable { get; set; }
     public DateTime? LastDonationDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

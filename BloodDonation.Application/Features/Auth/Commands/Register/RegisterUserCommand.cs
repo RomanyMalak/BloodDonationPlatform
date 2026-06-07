@@ -12,7 +12,7 @@ using BloodDonation.Domain.Entities;
 namespace BloodDonation.Application.Features.Auth.Commands.Register
 {
     
-    public record RegisterCommand(
+    public record RegisterUserCommand(
       string FullName,
     string Email,
     string Password,

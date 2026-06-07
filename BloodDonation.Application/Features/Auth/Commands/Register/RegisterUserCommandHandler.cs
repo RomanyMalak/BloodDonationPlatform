@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace BloodDonation.Application.Features.Auth.Commands.Register
 {
-    public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResponseDto>
+    public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, RegisterResponseDto>
     {
         private readonly IApplicationDbContext _context;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        public RegisterCommandHandler(IApplicationDbContext context, IJwtTokenGenerator jwtTokenGenerator)
+        public RegisterUserCommandHandler(IApplicationDbContext context, IJwtTokenGenerator jwtTokenGenerator)
         {
             _context = context;
             _jwtTokenGenerator = jwtTokenGenerator;
         }
-        public async Task<RegisterResponseDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<RegisterResponseDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
 
             var existingemail = await _context.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
