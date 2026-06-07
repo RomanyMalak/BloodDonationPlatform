@@ -20,12 +20,12 @@ public class DashboardService : IDashboardService
         var totalRequests = await _context.BloodRequests.CountAsync();
 
         var activeRequests = await _context.BloodRequests
-            .CountAsync(r => r.Status == RequestStatus.Pending
-                          || r.Status == RequestStatus.Processing
-                          || r.Status == RequestStatus.NotificationsSent);
+            .CountAsync(r => r.Status == RequestStatus.Approved
+                          || r.Status == RequestStatus.Matching
+                          || r.Status == RequestStatus.Completed);
 
         var totalDonors = await _context.Users
-            .CountAsync(u => u.Role == UserRole.Donor);
+            .CountAsync(u => u.Role == UserRole.User);
 
         var totalDonations = await _context.DonationHistories.CountAsync();
 
