@@ -25,7 +25,7 @@ public sealed class CreateBloodRequestHandler
             RequiredBloodType = request.RequiredBloodType,
             Urgency = request.Urgency,
             Status = RequestStatus.PendingVerification, 
-            HospitalId = request.HospitalId,
+            HospitalId = request.HospitalId ?? Guid.Empty,
             CustomHospitalName = request.CustomHospitalName,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
