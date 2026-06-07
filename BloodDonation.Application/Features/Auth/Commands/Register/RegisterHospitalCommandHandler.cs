@@ -35,9 +35,7 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
                 Email = request.Email,
                 PasswordHash = hashedPassword,
                 Role = UserRole.Hospital,
-                FullName=null,
-               
-
+             
                 CreatedAt = DateTime.UtcNow
             };
 

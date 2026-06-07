@@ -1,5 +1,6 @@
 ﻿using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
+using BloodDonation.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -41,7 +42,7 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
                 Phone = request.Phone,
                 Age = request.Age,
                 BloodType = request.BloodType,
-                Role = request.Role,
+                Role = UserRole.User,
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 IsAvailable = true,

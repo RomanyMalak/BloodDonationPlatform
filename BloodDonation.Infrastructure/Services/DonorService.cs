@@ -1,5 +1,6 @@
 using BloodDonation.Application.DTOs;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ public class DonorService : IDonorService
         var result = requests.Select(r =>
         {
             // Haversine formula to calculate distance
-            var distanceKm = CalculateDistance(donor.Latitude, donor.Longitude, r.Latitude, r.Longitude);
+            var distanceKm = CalculateDistance(donor.Latitude??0, donor.Longitude ?? 0, r.Latitude, r.Longitude);
             return new DonorNearbyRequestDto
             {
                 Id = r.Id,
