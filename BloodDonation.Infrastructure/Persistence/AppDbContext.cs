@@ -20,7 +20,7 @@ public class AppDbContext : DbContext, IApplicationDbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<UserReport> UserReports => Set<UserReport>();
     public DbSet<DonationHistory> DonationHistories => Set<DonationHistory>();
-
+    public DbSet<OcrVerification> OcrVerifications => Set<OcrVerification>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -31,6 +31,7 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.Property(x => x.FullName).HasMaxLength(150).IsRequired();
             entity.Property(x => x.Email).HasMaxLength(200).IsRequired();
             entity.HasIndex(x => x.Email).IsUnique();
+            entity.Property(x => x.Phone).HasMaxLength(11);
         });
 
         modelBuilder.Entity<Hospital>(entity =>
@@ -40,8 +41,11 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.Property(x => x.City).HasMaxLength(100);
             entity.Property(x => x.AddressDetail).HasMaxLength(300);
             entity.Property(x => x.IsActive).HasDefaultValue(false);
+            entity.HasIndex(x => new { x.Name, x.City }).IsUnique();
             entity.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             entity.HasIndex(x => x.UserId).IsUnique();
+            entity.Property(x => x.Hotline).HasMaxLength(50);
+            entity.Property(x => x.LicenseDocumentPath).HasMaxLength(500);
 
             entity.HasOne(x => x.User)
                 .WithOne(x => x.Hospital)
@@ -52,20 +56,40 @@ public class AppDbContext : DbContext, IApplicationDbContext
         modelBuilder.Entity<BloodRequest>(entity =>
         {
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.CustomHospitalName).HasMaxLength(200);
-            entity.Property(x => x.MedicalDocumentUrl).HasMaxLength(500);
-            entity.Property(x => x.Notes).HasMaxLength(500);
-            entity.Property(x => x.ContactPhone).HasMaxLength(30);
 
-            entity.HasOne(x => x.User)
-                .WithMany(x => x.BloodRequests)
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(x => x.PatientName)
+                  .HasMaxLength(150)
+                  .IsRequired();
+
+            entity.Property(x => x.PatientAge);
+
+            entity.Property(x => x.CustomHospitalName)
+                  .HasMaxLength(200);
+
+            entity.Property(x => x.MedicalDocumentUrl)
+                  .HasMaxLength(500);
+
+            entity.Property(x => x.Notes)
+                  .HasMaxLength(500);
+
+            entity.Property(x => x.ContactPhone)
+                  .HasMaxLength(30);
+
+            entity.Property(x => x.RejectionReason)
+                  .HasMaxLength(500);
+
+            entity.Property(x => x.CreatedAt)
+                  .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasOne(x => x.CreatedByUser)
+                  .WithMany(x => x.BloodRequests)
+                  .HasForeignKey(x => x.CreatedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(x => x.Hospital)
-                .WithMany(x => x.BloodRequests)
-                .HasForeignKey(x => x.HospitalId)
-                .OnDelete(DeleteBehavior.Restrict);
+                  .WithMany(x => x.BloodRequests)
+                  .HasForeignKey(x => x.HospitalId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<BloodRequestAcceptance>(entity =>
@@ -152,6 +176,21 @@ public class AppDbContext : DbContext, IApplicationDbContext
                 .WithMany(x => x.DonationHistories)
                 .HasForeignKey(x => x.BloodRequestId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+        modelBuilder.Entity<OcrVerification>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.RawExtractedText)
+                  .HasMaxLength(5000);
+
+            entity.Property(x => x.FailureReason)
+                  .HasMaxLength(500);
+
+            entity.HasOne(x => x.BloodRequest)
+                  .WithOne(x => x.OcrVerification)
+                  .HasForeignKey<OcrVerification>(x => x.BloodRequestId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

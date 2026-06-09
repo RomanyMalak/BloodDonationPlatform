@@ -25,7 +25,7 @@ public sealed class CancelBloodRequestCommandHandler
         if (bloodRequest is null) return false;
 
 
-        if (bloodRequest.UserId != request.UserId) return false;
+        if (bloodRequest.CreatedByUserId != request.UserId) return false;
 
      
         if (bloodRequest.Status == RequestStatus.Accepted ||
