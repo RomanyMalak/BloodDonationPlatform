@@ -1,5 +1,6 @@
 ﻿using BloodDonation.Application.DTOs.BloodRequest;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -39,8 +40,26 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
             if (bloodRequest is null)
                 return null;
 
-            if (bloodRequest.HospitalId != request.HospitalId)
+            var hospital = await _dbContext.Hospitals
+    .FirstOrDefaultAsync(
+        x => x.Id == request.HospitalId,
+        cancellationToken);
+
+
+            if (hospital is null)
+                throw new Exception("Hospital not found");
+
+
+            if (!hospital.IsActive)
+                throw new UnauthorizedAccessException(
+                    "Hospital is waiting for admin approval");
+
+
+            if (bloodRequest.HospitalId != hospital.Id)
                 throw new UnauthorizedAccessException();
+
+            if (bloodRequest.Status != RequestStatus.PendingVerification)
+                throw new Exception("Request already processed");
 
             bloodRequest.Status = RequestStatus.Matching;
             bloodRequest.ApprovedByHospitalId = request.HospitalId;

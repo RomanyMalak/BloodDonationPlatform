@@ -40,7 +40,22 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.RejectBloodReque
             if (bloodRequest is null)
                 return null;
 
-            if (bloodRequest.HospitalId != request.HospitalId)
+            var hospital = await _dbContext.Hospitals
+    .FirstOrDefaultAsync(
+        x => x.Id == request.HospitalId,
+        cancellationToken);
+
+
+            if (hospital is null)
+                throw new Exception("Hospital not found");
+
+
+            if (!hospital.IsActive)
+                throw new UnauthorizedAccessException(
+                    "Hospital is waiting for admin approval");
+
+
+            if (bloodRequest.HospitalId != hospital.Id)
                 throw new UnauthorizedAccessException();
 
             bloodRequest.Status = RequestStatus.Rejected;
