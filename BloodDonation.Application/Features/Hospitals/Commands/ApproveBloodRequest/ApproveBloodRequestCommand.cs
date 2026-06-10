@@ -1,7 +1,7 @@
 ﻿using BloodDonation.Application.DTOs.BloodRequest;
 using MediatR;
 
-namespace BloodDonation.Application.Features.BloodRequests.Commands.ApproveBloodRequest
+namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequest
 {
     public sealed record ApproveBloodRequestCommand
     : IRequest<BloodRequestDetailsDto?>

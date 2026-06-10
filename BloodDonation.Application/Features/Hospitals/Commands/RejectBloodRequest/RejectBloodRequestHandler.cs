@@ -9,31 +9,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BloodDonation.Application.Features.BloodRequests.Commands.ApproveBloodRequest
+namespace BloodDonation.Application.Features.Hospitals.Commands.RejectBloodRequest
 {
-    public sealed class ApproveBloodRequestHandler
-    : IRequestHandler<ApproveBloodRequestCommand, BloodRequestDetailsDto?>
+    public sealed class RejectBloodRequestHandler
+    : IRequestHandler<RejectBloodRequestCommand, BloodRequestDetailsDto?>
     {
 
         private readonly IApplicationDbContext _dbContext;
 
-        public ApproveBloodRequestHandler(
+
+        public RejectBloodRequestHandler(
             IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
+
+
         public async Task<BloodRequestDetailsDto?> Handle(
-            ApproveBloodRequestCommand request,
+            RejectBloodRequestCommand request,
             CancellationToken cancellationToken)
         {
+
+
             var bloodRequest =await _dbContext.BloodRequests
                 .Include(x => x.Hospital)
-                .Include(x => x.CreatedByUser)
-                .FirstOrDefaultAsync(
-                    x => x.Id == request.BloodRequestId,
-                    cancellationToken
-                );
+                .FirstOrDefaultAsync( x => x.Id == request.BloodRequestId,cancellationToken);
 
 
             if (bloodRequest is null)
@@ -42,9 +43,8 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.ApproveBlood
             if (bloodRequest.HospitalId != request.HospitalId)
                 throw new UnauthorizedAccessException();
 
-            bloodRequest.Status = RequestStatus.Matching;
-            bloodRequest.ApprovedByHospitalId = request.HospitalId;
-            bloodRequest.ApprovedAt = DateTime.UtcNow;
+            bloodRequest.Status = RequestStatus.Rejected;
+            bloodRequest.RejectionReason = request.Reason;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -52,12 +52,12 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.ApproveBlood
             {
                 Id = bloodRequest.Id,
                 PatientName = bloodRequest.PatientName,
-                RequiredBloodType = bloodRequest.RequiredBloodType.ToString(),
+                RequiredBloodType =bloodRequest.RequiredBloodType.ToString(),
                 Urgency = bloodRequest.Urgency.ToString(),
                 Status = bloodRequest.Status.ToString(),
                 HospitalName =bloodRequest.Hospital?.Name,
                 UnitsNeeded = bloodRequest.UnitsNeeded,
-                CreatedAt =bloodRequest.CreatedAt
+                CreatedAt = bloodRequest.CreatedAt
             };
         }
     }
