@@ -1,5 +1,6 @@
 using BloodDonation.Application.DTOs;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -32,13 +33,23 @@ public class DashboardService : IDashboardService
         var totalNotificationsSent = await _context.AiMatchingLogs
             .SumAsync(l => (int?)l.NotificationsSent) ?? 0;
 
+        // Hospital statistics
+        var totalHospitals    = await _context.Hospitals.CountAsync();
+        var waitingHospitals  = await _context.Hospitals.CountAsync(h => h.Status == HospitalStatus.Waiting);
+        var activeHospitals   = await _context.Hospitals.CountAsync(h => h.Status == HospitalStatus.Active);
+        var rejectedHospitals = await _context.Hospitals.CountAsync(h => h.Status == HospitalStatus.Rejected);
+
         return new DashboardStatsDto
         {
-            TotalRequests = totalRequests,
-            ActiveRequests = activeRequests,
-            TotalDonors = totalDonors,
-            TotalDonations = totalDonations,
-            TotalNotificationsSent = totalNotificationsSent
+            TotalRequests          = totalRequests,
+            ActiveRequests         = activeRequests,
+            TotalDonors            = totalDonors,
+            TotalDonations         = totalDonations,
+            TotalNotificationsSent = totalNotificationsSent,
+            TotalHospitals         = totalHospitals,
+            WaitingHospitals       = waitingHospitals,
+            ActiveHospitals        = activeHospitals,
+            RejectedHospitals      = rejectedHospitals
         };
     }
 
@@ -48,15 +59,15 @@ public class DashboardService : IDashboardService
             .OrderByDescending(l => l.CreatedAt)
             .Select(l => new AiMatchingLogDto
             {
-                Id = l.Id,
-                BloodRequestId = l.BloodRequestId,
-                PriorityResult = l.PriorityResult.ToString(),
-                MatchedDonorsCount = l.MatchedDonorsCount,
-                NotificationsSent = l.NotificationsSent,
-                SearchRadiusKm = l.SearchRadiusKm,
+                Id                       = l.Id,
+                BloodRequestId           = l.BloodRequestId,
+                PriorityResult           = l.PriorityResult.ToString(),
+                MatchedDonorsCount       = l.MatchedDonorsCount,
+                NotificationsSent        = l.NotificationsSent,
+                SearchRadiusKm           = l.SearchRadiusKm,
                 UsedCompatibleBloodTypes = l.UsedCompatibleBloodTypes,
-                PipelineSummary = l.PipelineSummary,
-                CreatedAt = l.CreatedAt
+                PipelineSummary          = l.PipelineSummary,
+                CreatedAt                = l.CreatedAt
             })
             .ToListAsync();
     }

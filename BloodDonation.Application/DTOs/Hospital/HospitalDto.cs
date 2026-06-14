@@ -1,13 +1,8 @@
-namespace BloodDonation.Domain.Entities;
+using BloodDonation.Domain.Entities;
 
-public enum HospitalStatus
-{
-    Waiting = 0,
-    Active = 1,
-    Rejected = 2
-}
+namespace BloodDonation.Application.DTOs.Hospital;
 
-public class Hospital
+public class HospitalDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -16,12 +11,10 @@ public class Hospital
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public bool IsKnown { get; set; }
+    public HospitalStatus Status { get; set; }
+    public string StatusLabel => Status.ToString();
     public DateTime CreatedAt { get; set; }
-
-    // Admin approval
-    public HospitalStatus Status { get; set; } = HospitalStatus.Waiting;
     public DateTime? ReviewedAt { get; set; }
     public string? RejectionReason { get; set; }
-
-    public ICollection<BloodRequest> BloodRequests { get; set; } = new List<BloodRequest>();
+    public int TotalBloodRequests { get; set; }
 }

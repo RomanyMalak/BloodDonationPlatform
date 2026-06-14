@@ -219,6 +219,17 @@ namespace BloodDonation.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasDefaultValue(0)
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Hospitals");

@@ -39,6 +39,8 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.Property(x => x.City).HasMaxLength(100);
             entity.Property(x => x.Address).HasMaxLength(300);
+            entity.Property(x => x.RejectionReason).HasMaxLength(500);
+            entity.Property(x => x.Status).HasDefaultValue(HospitalStatus.Waiting);
         });
 
         modelBuilder.Entity<BloodRequest>(entity =>
