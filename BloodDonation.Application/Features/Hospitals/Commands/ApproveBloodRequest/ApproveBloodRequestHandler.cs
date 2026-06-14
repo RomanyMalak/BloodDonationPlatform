@@ -17,11 +17,13 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
     {
 
         private readonly IApplicationDbContext _dbContext;
+        private readonly INotificationService _notificationService;
 
         public ApproveBloodRequestHandler(
-            IApplicationDbContext dbContext)
+            IApplicationDbContext dbContext, INotificationService notificationService)
         {
             _dbContext = dbContext;
+            _notificationService = notificationService;
         }
 
         public async Task<BloodRequestDetailsDto?> Handle(
@@ -30,7 +32,6 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
         {
             var bloodRequest =await _dbContext.BloodRequests
                 .Include(x => x.Hospital)
-                .Include(x => x.CreatedByUser)
                 .FirstOrDefaultAsync(
                     x => x.Id == request.BloodRequestId,
                     cancellationToken
@@ -40,10 +41,8 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
             if (bloodRequest is null)
                 return null;
 
-            var hospital = await _dbContext.Hospitals
-    .FirstOrDefaultAsync(
-        x => x.Id == request.HospitalId,
-        cancellationToken);
+            var hospital = await _dbContext.Hospitals.FirstOrDefaultAsync(
+                x => x.Id == request.HospitalId,cancellationToken);
 
 
             if (hospital is null)
@@ -66,6 +65,14 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
             bloodRequest.ApprovedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await _notificationService.CreateAsync(
+                   bloodRequest.CreatedByUserId,
+                   "Blood Request Approved",
+                   "Your blood request has been approved by the hospital.",
+                   bloodRequest.Id,
+                   "BloodRequest",
+                   cancellationToken);
 
             return new BloodRequestDetailsDto
             {

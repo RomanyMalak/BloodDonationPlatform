@@ -16,7 +16,7 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
 
         public int? PatientAge { get; init; }
 
-        public BloodType RequiredBloodType { get; init; }
+        public BloodType? RequiredBloodType { get; init; }
 
         public RequestUrgency Urgency { get; init; }
 

@@ -25,13 +25,16 @@ public sealed class CancelBloodRequestCommandHandler
         if (bloodRequest is null) return false;
 
 
-        if (bloodRequest.CreatedByUserId != request.UserId) return false;
+        if (bloodRequest.CreatedByUserId != request.UserId)
+            return false;
 
-     
-        if (bloodRequest.Status == RequestStatus.Accepted ||
+        if (bloodRequest.Status == RequestStatus.Matching ||
+            bloodRequest.Status == RequestStatus.Accepted ||
             bloodRequest.Status == RequestStatus.Completed ||
             bloodRequest.Status == RequestStatus.Cancelled)
+        {
             return false;
+        }
 
         bloodRequest.Status = RequestStatus.Cancelled;
         await _dbContext.SaveChangesAsync(cancellationToken);

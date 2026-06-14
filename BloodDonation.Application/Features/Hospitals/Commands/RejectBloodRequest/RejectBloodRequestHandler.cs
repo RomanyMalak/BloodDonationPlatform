@@ -16,12 +16,14 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.RejectBloodReque
     {
 
         private readonly IApplicationDbContext _dbContext;
+        private readonly INotificationService _notificationService;
 
 
         public RejectBloodRequestHandler(
-            IApplicationDbContext dbContext)
+            IApplicationDbContext dbContext, INotificationService notificationService)
         {
             _dbContext = dbContext;
+            _notificationService = notificationService;
         }
 
 
@@ -41,27 +43,30 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.RejectBloodReque
                 return null;
 
             var hospital = await _dbContext.Hospitals
-    .FirstOrDefaultAsync(
-        x => x.Id == request.HospitalId,
-        cancellationToken);
+                .FirstOrDefaultAsync( x => x.Id == request.HospitalId, cancellationToken);
 
 
             if (hospital is null)
                 throw new Exception("Hospital not found");
 
-
-            if (!hospital.IsActive)
-                throw new UnauthorizedAccessException(
-                    "Hospital is waiting for admin approval");
-
-
             if (bloodRequest.HospitalId != hospital.Id)
                 throw new UnauthorizedAccessException();
+
+            if (bloodRequest.Status != RequestStatus.PendingVerification)
+                throw new Exception("Request already processed");
 
             bloodRequest.Status = RequestStatus.Rejected;
             bloodRequest.RejectionReason = request.Reason;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await _notificationService.CreateAsync(
+            bloodRequest.CreatedByUserId,
+            "Blood Request Rejected",
+            $"Your request was rejected. Reason: {request.Reason}",
+            bloodRequest.Id,
+            "BloodRequest",
+            cancellationToken);
 
             return new BloodRequestDetailsDto
             {

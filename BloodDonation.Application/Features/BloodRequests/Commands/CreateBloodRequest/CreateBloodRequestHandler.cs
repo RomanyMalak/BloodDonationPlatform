@@ -26,41 +26,35 @@ public sealed class CreateBloodRequestHandler
             hospitalIsRegistered = await _dbContext.Hospitals.AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
 
         }
+        var user = await _dbContext.Users.FirstAsync( x => x.Id == request.CreatedByUserId,cancellationToken);
+
+        bool hospitalIsActive = false;
+        if (request.HospitalId.HasValue)
+        {
+            hospitalIsActive = await _dbContext.Hospitals.AnyAsync(
+                    h => h.Id == request.HospitalId.Value && h.IsActive,cancellationToken);
+        }
+
+
         var bloodRequest = new BloodRequest
         {
             Id = Guid.NewGuid(),
 
-            PatientName = request.PatientName,
-
-            PatientAge = request.PatientAge,
-
-            RequiredBloodType = request.RequiredBloodType,
-
-            Urgency = request.Urgency,
-
+            PatientName = request.PatientName ?? user.FullName,
+            PatientAge =request.PatientAge ?? user.Age,
+            RequiredBloodType = request.RequiredBloodType ?? user.BloodType!.Value,
+            Status =RequestStatus.PendingVerification,
             HospitalId = request.HospitalId,
-
             CustomHospitalName = request.CustomHospitalName,
-
             Latitude = request.Latitude,
-
             Longitude = request.Longitude,
-
             MedicalDocumentUrl = request.MedicalDocumentUrl,
-
             Notes = request.Notes,
-
             ContactPhone = request.ContactPhone,
-
             UnitsNeeded = request.UnitsNeeded,
-
             ExpiresAt = request.ExpiresAt,
-
             CreatedByUserId = request.CreatedByUserId,
-
-            CreatedAt = DateTime.UtcNow,
-
-            Status = RequestStatus.PendingVerification
+            CreatedAt = DateTime.UtcNow
         };
 
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
