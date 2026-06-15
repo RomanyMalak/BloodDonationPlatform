@@ -4,6 +4,7 @@ using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BloodDonation.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260607004906_AddUnitsNeededToBloodRequests")]
+    partial class AddUnitsNeededToBloodRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,13 +200,11 @@ namespace BloodDonation.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AddressDetail")
-                        .IsRequired()
+                    b.Property<string>("Address")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -212,25 +213,17 @@ namespace BloodDonation.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("Government")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Hotline")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsKnown")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(true);
 
                     b.Property<double>("Latitude")
                         .HasColumnType("float");
-
-                    b.Property<string>("LicenseDocumentPath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Longitude")
                         .HasColumnType("float");
@@ -240,16 +233,9 @@ namespace BloodDonation.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasDefaultValue(0)
-                        .HasColumnType("int");
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -366,10 +352,10 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.Property<DateTime?>("LastDonationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("Latitude")
+                    b.Property<double>("Latitude")
                         .HasColumnType("float");
 
-                    b.Property<double?>("Longitude")
+                    b.Property<double>("Longitude")
                         .HasColumnType("float");
 
                     b.Property<string>("PasswordHash")

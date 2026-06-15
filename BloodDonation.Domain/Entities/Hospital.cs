@@ -1,4 +1,4 @@
-namespace BloodDonation.Domain.Entities;
+﻿namespace BloodDonation.Domain.Entities;
 
 public enum HospitalStatus
 {
@@ -9,10 +9,19 @@ public enum HospitalStatus
 
 public class Hospital
 {
+    // 1. المعرفات الأساسية والربط مع الـ Auth
     public Guid Id { get; set; }
+
+    public Guid UserId { get; set; }
+    public User User { get; set; } // علاقة (1 to 1) مع جدول المستخدمين الأساسي لزوم الـ Login
+
+    // 2. البيانات التعريفية والموقع
     public string Name { get; set; } = string.Empty;
-    public string? City { get; set; }
-    public string? Address { get; set; }
+    public string Government { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string AddressDetail { get; set; } = string.Empty;
+
+    // الإحداثيات الجغرافية لمعالجة الـ Geo-Matching Agent
     public double Latitude { get; set; }
     public double Longitude { get; set; }
 

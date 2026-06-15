@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest
 {
-    public sealed class CreateBloodRequestCommand : IRequest<CreateBloodRequestResponseDto>
+    public sealed record CreateBloodRequestCommand : IRequest<CreateBloodRequestResponseDto>
     {
         public BloodType RequiredBloodType { get; init; }
         public RequestUrgency Urgency { get; init; }
@@ -23,6 +23,6 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
         public int UnitsNeeded { get; init; }
         public DateTime? ExpiresAt { get; init; }
 
-        public Guid PatientId { get; init; }
+        public Guid UserId { get; init; }
     }
 }

@@ -1,5 +1,6 @@
 using BloodDonation.Application.DTOs;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

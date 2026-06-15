@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// AcceptBloodRequestCommand.cs
+using MediatR;
 
-namespace BloodDonation.Application.Features.BloodRequests.Commands.AcceptBloodRequest
+namespace BloodDonation.Application.Features.BloodRequests.Commands.AcceptBloodRequest;
+
+public sealed class AcceptBloodRequestCommand : IRequest<bool>
 {
-    internal class AcceptBloodRequestCommand
-    {
-    }
+    public Guid BloodRequestId { get; init; }
+    public Guid DonorId { get; init; } 
 }

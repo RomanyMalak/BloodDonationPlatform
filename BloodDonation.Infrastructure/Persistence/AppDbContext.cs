@@ -56,9 +56,9 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.Property(x => x.Notes).HasMaxLength(500);
             entity.Property(x => x.ContactPhone).HasMaxLength(30);
 
-            entity.HasOne(x => x.Patient)
-                .WithMany(x => x.PatientRequests)
-                .HasForeignKey(x => x.PatientId)
+            entity.HasOne(x => x.User)
+                .WithMany(x => x.BloodRequests)
+                .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(x => x.Hospital)
@@ -140,11 +140,11 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.Property(x => x.HospitalName).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Notes).HasMaxLength(500);
             entity.HasOne(x => x.Donor)
-                .WithMany(x => x.DonationsAsDonor)
+                .WithMany(x => x.DonationsMade)
                 .HasForeignKey(x => x.DonorId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Patient)
-                .WithMany(x => x.DonationsAsPatient)
+                .WithMany(x => x.DonationsReceived)
                 .HasForeignKey(x => x.PatientId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.BloodRequest)

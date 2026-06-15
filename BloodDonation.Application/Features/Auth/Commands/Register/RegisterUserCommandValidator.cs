@@ -7,10 +7,10 @@ using FluentValidation;
 
 namespace BloodDonation.Application.Features.Auth.Commands.Register
 {
-    public class RegisterCommandValidator: AbstractValidator<RegisterCommand>
+    public class RegisterUserCommandValidator: AbstractValidator<RegisterUserCommand>
     {
         
-        public RegisterCommandValidator() {
+        public RegisterUserCommandValidator() {
 
             //fullname validation
                 RuleFor(x => x.FullName)

@@ -1,138 +1,176 @@
-﻿using BloodDonation.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+﻿using BloodDonation.API.Middewares;
+using BloodDonation.Application.Extensions;
+using BloodDonation.Infrastructure.Extensions;
+using BloodDonation.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using BloodDonation.API.Middewares;
-using BloodDonation.Application.Interfaces;
-using BloodDonation.Application.Features.Auth.Commands.Register;
-using BloodDonation.Infrastructure.Services;
-using MediatR;
-using FluentValidation;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//dependency injection
-// 1. تسجيل مكتبة MediatR لقراءة الـ Handlers بتوعك تلقائياً
-builder.Services.AddMediatR(typeof(RegisterCommand).Assembly);
-// 2. تسجيل مكتبة FluentValidation لقراءة الـ Validators بتوعك تلقائياً
-builder.Services.AddValidatorsFromAssembly(typeof(RegisterCommandValidator).Assembly);
+#region Services
 
-// 3. تسجيل خدمة توليد الـ Token
-builder.Services.AddScoped<IJwtTokenGenerator,JwtTokenGenerator>();
-builder.Services.AddScoped<IApplicationDbContext, AppDbContext>();
+builder.Services.AddApplication();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSignalR();
+
 builder.Services.AddAuthorization();
-//
-//cors 
 
-
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("BloodDonation.Infrastructure")
-    ));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClientPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // defulte  Angular 
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); //  SignalR 
+              .AllowCredentials();
     });
 });
-// JWT Authentication setings
-var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
-var secretKey= jwtSettingsSection["SecretKey"];
+
+#endregion
+
+#region Authentication
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
-        ClockSkew = TimeSpan.Zero
-    };
-    // For SignalR authentication
+    options.TokenValidationParameters =
+        new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer =
+                builder.Configuration["JwtSettings:Issuer"],
+
+            ValidAudience =
+                builder.Configuration["JwtSettings:Audience"],
+
+            IssuerSigningKey =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(
+                        builder.Configuration["JwtSettings:SecretKey"]!)),
+
+            ClockSkew = TimeSpan.Zero
+        };
+
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            var accessToken = context.Request.Query["access_token"];
-            var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+            var accessToken =
+                context.Request.Query["access_token"];
+
+            var path =
+                context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken)
+                && path.StartsWithSegments("/hubs/notifications"))
             {
                 context.Token = accessToken;
             }
+
             return Task.CompletedTask;
         }
     };
 });
-builder.Services.AddControllers();
-builder.Services.AddSignalR();
-builder.Services.AddEndpointsApiExplorer();
-// Swagger
-builder.Services.AddSwaggerGen(c=>
+
+#endregion
+
+#region Swagger
+
+builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Blood Donation API",
         Version = "v1",
-        Description = "API for managing blood donation requests and donors."
+        Description =
+            "API for managing blood donation requests and donors."
     });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
 
-
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    c.AddSecurityDefinition("Bearer",
+        new OpenApiSecurityScheme
         {
-            new OpenApiSecurityScheme
+            Description =
+                "JWT Authorization header using Bearer scheme",
+
+            Name = "Authorization",
+
+            In = ParameterLocation.Header,
+
+            Type = SecuritySchemeType.ApiKey,
+
+            Scheme = "Bearer"
+        });
+
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
             {
-                Reference = new OpenApiReference
+                new OpenApiSecurityScheme
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Reference =
+                        new OpenApiReference
+                        {
+                            Type =
+                                ReferenceType.SecurityScheme,
+
+                            Id = "Bearer"
+                        }
                 },
-                Scheme = "Bearer",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
+                Array.Empty<string>()
+            }
+        });
 });
 
-//
+#endregion
+
 var app = builder.Build();
+
+#region Pipeline
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseCors("AngularClientPolicy");
+
 app.UseAuthentication();
+
 app.UseAuthorization();
+
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await SeedData.SeedAsync(dbContext);
+}
+
 app.Run();
+
+#endregion
