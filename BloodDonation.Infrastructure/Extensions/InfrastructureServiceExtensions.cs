@@ -32,7 +32,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         // تسجيل خدمة المتبرعين في السيرفر
         services.AddScoped<IDonorService, DonorService>();
-        services.AddScoped<IDashboardService, DashboardService>();
+       // services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<INotificationService, NotificationService>();
 
 
