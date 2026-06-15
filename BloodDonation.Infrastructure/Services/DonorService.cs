@@ -23,13 +23,13 @@ public class DonorService : IDonorService
 
         var requests = await _context.BloodRequests
             .Include(r => r.Hospital)
-            .Where(r => r.Status == RequestStatus.Approved || r.Status == RequestStatus.Matching)
+            .Where(r => r.Status == RequestStatus.NotificationsSent || r.Status == RequestStatus.Pending)
             .ToListAsync();
 
         var result = requests.Select(r =>
         {
             // Haversine formula to calculate distance
-            var distanceKm = CalculateDistance(donor.Latitude??0, donor.Longitude ?? 0, r.Latitude, r.Longitude);
+            var distanceKm = CalculateDistance(donor.Latitude, donor.Longitude, r.Latitude, r.Longitude);
             return new DonorNearbyRequestDto
             {
                 Id = r.Id,
