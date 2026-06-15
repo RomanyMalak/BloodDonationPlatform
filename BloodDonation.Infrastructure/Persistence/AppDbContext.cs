@@ -2,7 +2,6 @@ using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace BloodDonation.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext, IApplicationDbContext
@@ -38,9 +37,15 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.Property(x => x.City).HasMaxLength(100);
-            entity.Property(x => x.Address).HasMaxLength(300);
-            entity.Property(x => x.RejectionReason).HasMaxLength(500);
-            entity.Property(x => x.Status).HasDefaultValue(HospitalStatus.Waiting);
+            entity.Property(x => x.AddressDetail).HasMaxLength(300);
+            entity.Property(x => x.IsActive).HasDefaultValue(false);
+            entity.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            entity.HasIndex(x => x.UserId).IsUnique();
+
+            entity.HasOne(x => x.User)
+                .WithOne(x => x.Hospital)
+                .HasForeignKey<Hospital>(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<BloodRequest>(entity =>

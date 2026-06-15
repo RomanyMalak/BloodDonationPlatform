@@ -33,12 +33,6 @@ public class DashboardService : IDashboardService
         var totalNotificationsSent = await _context.AiMatchingLogs
             .SumAsync(l => (int?)l.NotificationsSent) ?? 0;
 
-        // Hospital statistics
-        var totalHospitals    = await _context.Hospitals.CountAsync();
-        var waitingHospitals  = await _context.Hospitals.CountAsync(h => h.Status == HospitalStatus.Waiting);
-        var activeHospitals   = await _context.Hospitals.CountAsync(h => h.Status == HospitalStatus.Active);
-        var rejectedHospitals = await _context.Hospitals.CountAsync(h => h.Status == HospitalStatus.Rejected);
-
         return new DashboardStatsDto
         {
             TotalRequests          = totalRequests,
