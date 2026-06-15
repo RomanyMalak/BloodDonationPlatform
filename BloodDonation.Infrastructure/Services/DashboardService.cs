@@ -1,5 +1,6 @@
 using BloodDonation.Application.DTOs;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +21,12 @@ public class DashboardService : IDashboardService
         var totalRequests = await _context.BloodRequests.CountAsync();
 
         var activeRequests = await _context.BloodRequests
-            .CountAsync(r => r.Status == RequestStatus.Approved
-                          || r.Status == RequestStatus.Matching
-                          || r.Status == RequestStatus.Completed);
+            .CountAsync(r => r.Status == RequestStatus.Pending
+                          || r.Status == RequestStatus.Processing
+                          || r.Status == RequestStatus.NotificationsSent);
 
         var totalDonors = await _context.Users
-            .CountAsync(u => u.Role == UserRole.User);
+            .CountAsync(u => u.Role == UserRole.Donor);
 
         var totalDonations = await _context.DonationHistories.CountAsync();
 
@@ -34,11 +35,15 @@ public class DashboardService : IDashboardService
 
         return new DashboardStatsDto
         {
-            TotalRequests = totalRequests,
-            ActiveRequests = activeRequests,
-            TotalDonors = totalDonors,
-            TotalDonations = totalDonations,
-            TotalNotificationsSent = totalNotificationsSent
+            TotalRequests          = totalRequests,
+            ActiveRequests         = activeRequests,
+            TotalDonors            = totalDonors,
+            TotalDonations         = totalDonations,
+            TotalNotificationsSent = totalNotificationsSent,
+            TotalHospitals         = totalHospitals,
+            WaitingHospitals       = waitingHospitals,
+            ActiveHospitals        = activeHospitals,
+            RejectedHospitals      = rejectedHospitals
         };
     }
 
@@ -48,15 +53,15 @@ public class DashboardService : IDashboardService
             .OrderByDescending(l => l.CreatedAt)
             .Select(l => new AiMatchingLogDto
             {
-                Id = l.Id,
-                BloodRequestId = l.BloodRequestId,
-                PriorityResult = l.PriorityResult.ToString(),
-                MatchedDonorsCount = l.MatchedDonorsCount,
-                NotificationsSent = l.NotificationsSent,
-                SearchRadiusKm = l.SearchRadiusKm,
+                Id                       = l.Id,
+                BloodRequestId           = l.BloodRequestId,
+                PriorityResult           = l.PriorityResult.ToString(),
+                MatchedDonorsCount       = l.MatchedDonorsCount,
+                NotificationsSent        = l.NotificationsSent,
+                SearchRadiusKm           = l.SearchRadiusKm,
                 UsedCompatibleBloodTypes = l.UsedCompatibleBloodTypes,
-                PipelineSummary = l.PipelineSummary,
-                CreatedAt = l.CreatedAt
+                PipelineSummary          = l.PipelineSummary,
+                CreatedAt                = l.CreatedAt
             })
             .ToListAsync();
     }

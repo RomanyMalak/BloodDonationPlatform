@@ -1,5 +1,12 @@
 ﻿namespace BloodDonation.Domain.Entities;
 
+public enum HospitalStatus
+{
+    Waiting = 0,
+    Active = 1,
+    Rejected = 2
+}
+
 public class Hospital
 {
     // 1. المعرفات الأساسية والربط مع الـ Auth
