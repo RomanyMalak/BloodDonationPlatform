@@ -94,21 +94,23 @@ public class HospitalsController : ControllerBase
         }
     }
 
+
     /// <summary>
     /// POST /api/hospitals/{id}/reject
     /// Admin rejects a hospital with optional reason
     /// </summary>
-    [HttpPost("{id:guid}/reject")]
-    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectHospitalDto? dto)
-    {
-        try
-        {
-            var result = await _hospitalService.RejectAsync(id, dto?.Reason);
-            return Ok(new { message = "Hospital rejected.", hospital = result });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
+    //[HttpPost("{id:guid}/reject")]
+    //public async Task<IActionResult> Reject(Guid id, [FromBody] RejectHospitalDto? dto)
+    //{
+    //    try
+    //    {
+    //        var result = await _hospitalService.RejectAsync(id, dto?.Reason);
+    //        return Ok(new { message = "Hospital rejected.", hospital = result });
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(new { message = ex.Message });
+    //    }
+    //    }
+    //}
 }
