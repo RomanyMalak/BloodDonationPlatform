@@ -1,5 +1,6 @@
 using BloodDonation.Application.DTOs;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,5 +53,23 @@ public class NotificationService : INotificationService
             n.IsRead = true;
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task CreateAsync(Guid userId,string title, string message,Guid? bloodRequestId, string type,CancellationToken cancellationToken)
+    {
+        var notification = new Notification
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Title = title,
+            Message = message,
+            Type = type,
+            BloodRequestId = bloodRequestId,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _context.Notifications.AddAsync(notification, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

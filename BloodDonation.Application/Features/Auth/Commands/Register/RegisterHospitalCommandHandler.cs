@@ -10,7 +10,7 @@ using BloodDonation.Domain.Enums;
 
 namespace BloodDonation.Application.Features.Auth.Commands.Register
 {
-    internal class RegisterHospitalCommandHandler : IRequestHandler<RegisterHospitalCommand, Guid>
+    public class RegisterHospitalCommandHandler : IRequestHandler<RegisterHospitalCommand, Guid>
     {
         private readonly IApplicationDbContext _context;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;

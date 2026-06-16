@@ -4,6 +4,7 @@ using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BloodDonation.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260609025541_EditBllodRequest")]
+    partial class EditBllodRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,16 +265,6 @@ namespace BloodDonation.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasDefaultValue(0)
-                        .HasColumnType("int");
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -338,15 +331,6 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.Property<double>("ConfidenceScore")
                         .HasColumnType("float");
-
-                    b.Property<int?>("ExtractedBloodType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ExtractedUnits")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ExtractedUrgency")
-                        .HasColumnType("int");
 
                     b.Property<string>("FailureReason")
                         .HasMaxLength(500)

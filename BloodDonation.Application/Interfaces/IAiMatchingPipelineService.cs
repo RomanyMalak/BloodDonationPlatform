@@ -1,5 +1,6 @@
 namespace BloodDonation.Application.Interfaces;
 
-public class IAiMatchingPipelineService
+public interface IAiMatchingPipelineService
 {
+    Task RunAsync(Guid bloodRequestId, CancellationToken cancellationToken);
 }

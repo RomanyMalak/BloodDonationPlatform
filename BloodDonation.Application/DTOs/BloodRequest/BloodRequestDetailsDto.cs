@@ -2,17 +2,19 @@ namespace BloodDonation.Application.DTOs.BloodRequest;
 
 public class BloodRequestDetailsDto
 {
-    public Guid Id { get; init; }
-    public string RequiredBloodType { get; init; } = null!;
-    public string Urgency { get; init; } = null!;
-    public string Status { get; init; } = null!;
-    public string? HospitalName { get; init; }
-    public double Latitude { get; init; }
-    public double Longitude { get; init; }
-    public int UnitsNeeded { get; init; }
-    public string? ContactPhone { get; init; }
-    public string? Notes { get; init; }
-    public DateTime CreatedAt { get; init; }
-    public DateTime? ExpiresAt { get; init; }
-    public string PatientName { get; init; } = null!;
+    public Guid Id { get; set; }
+    public string PatientName { get; set; } = string.Empty;
+    public int? PatientAge { get; set; }
+    public string RequiredBloodType { get; set; } = string.Empty;
+    public string Urgency { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string? HospitalName { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public int UnitsNeeded { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? Notes { get; set; }
+    public DateTime? CreatedAt {  get; set; }
+    public DateTime? ExpiresAt { get; set; }
+    public DateTime? ApprovedAt { get; set; }
 }

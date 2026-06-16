@@ -1,116 +1,79 @@
-using BloodDonation.Application.DTOs.Hospital;
+﻿using BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequest;
+using BloodDonation.Application.Features.Hospitals.Commands.RejectBloodRequest;
+using BloodDonation.Application.Features.Hospitals.Queries.GetPendingRequests;
 using BloodDonation.Application.Interfaces;
-using BloodDonation.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BloodDonation.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-// [Authorize(Roles = "Admin")]  // Uncomment when Auth middleware is fully wired
+[Route("api/hospitals")]
+[Authorize(Roles = "Hospital")]
 public class HospitalsController : ControllerBase
 {
-    private readonly IHospitalService _hospitalService;
+    private readonly IMediator _mediator;
+    private readonly IApplicationDbContext _dbContext;
 
-    public HospitalsController(IHospitalService hospitalService)
+    public HospitalsController(IMediator mediator, IApplicationDbContext dbContext)
     {
-        _hospitalService = hospitalService;
+        _mediator = mediator;
+        _dbContext = dbContext;
     }
 
-    /// <summary>
-    /// GET /api/hospitals
-    /// Returns all hospitals (Admin Dashboard)
-    /// </summary>
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    private async Task<Guid?> GetHospitalIdFromJwt(CancellationToken ct)
     {
-        var hospitals = await _hospitalService.GetAllAsync();
-        return Ok(hospitals);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return null;
+
+        var hospital = await _dbContext.Hospitals
+            .FirstOrDefaultAsync(h => h.UserId == Guid.Parse(userId), ct);
+
+        return hospital?.Id;
     }
 
-    /// <summary>
-    /// GET /api/hospitals/waiting
-    /// Returns hospitals pending approval
-    /// </summary>
-    [HttpGet("waiting")]
-    public async Task<IActionResult> GetWaiting()
+    [HttpPut("requests/{id}/approve")]
+    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
-        var hospitals = await _hospitalService.GetByStatusAsync(HospitalStatus.Waiting);
-        return Ok(hospitals);
-    }
+        var hospitalId = await GetHospitalIdFromJwt(ct);
+        if (hospitalId is null) return Unauthorized();
 
-    /// <summary>
-    /// GET /api/hospitals/active
-    /// Returns approved/active hospitals
-    /// </summary>
-    [HttpGet("active")]
-    public async Task<IActionResult> GetActive()
-    {
-        var hospitals = await _hospitalService.GetByStatusAsync(HospitalStatus.Active);
-        return Ok(hospitals);
-    }
-
-    /// <summary>
-    /// GET /api/hospitals/rejected
-    /// Returns rejected hospitals
-    /// </summary>
-    [HttpGet("rejected")]
-    public async Task<IActionResult> GetRejected()
-    {
-        var hospitals = await _hospitalService.GetByStatusAsync(HospitalStatus.Rejected);
-        return Ok(hospitals);
-    }
-
-    /// <summary>
-    /// GET /api/hospitals/{id}
-    /// Returns a single hospital details
-    /// </summary>
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        var hospital = await _hospitalService.GetByIdAsync(id);
-        if (hospital == null)
-            return NotFound(new { message = $"Hospital {id} not found." });
-
-        return Ok(hospital);
-    }
-
-    /// <summary>
-    /// POST /api/hospitals/{id}/approve
-    /// Admin approves a hospital
-    /// </summary>
-    [HttpPost("{id:guid}/approve")]
-    public async Task<IActionResult> Approve(Guid id)
-    {
-        try
+        var result = await _mediator.Send(new ApproveBloodRequestCommand
         {
-            var result = await _hospitalService.ApproveAsync(id);
-            return Ok(new { message = "Hospital approved successfully.", hospital = result });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+            BloodRequestId = id,
+            HospitalId = hospitalId.Value
+        }, ct);
+
+        return result is null ? NotFound() : Ok(result);
     }
 
+    [HttpPut("requests/{id}/reject")]
+    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectBloodRequestCommand body, CancellationToken ct)
+    {
+        var hospitalId = await GetHospitalIdFromJwt(ct);
+        if (hospitalId is null) return Unauthorized();
 
-    /// <summary>
-    /// POST /api/hospitals/{id}/reject
-    /// Admin rejects a hospital with optional reason
-    /// </summary>
-    //[HttpPost("{id:guid}/reject")]
-    //public async Task<IActionResult> Reject(Guid id, [FromBody] RejectHospitalDto? dto)
-    //{
-    //    try
-    //    {
-    //        var result = await _hospitalService.RejectAsync(id, dto?.Reason);
-    //        return Ok(new { message = "Hospital rejected.", hospital = result });
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return BadRequest(new { message = ex.Message });
-    //    }
-    //    }
-    //}
+        var result = await _mediator.Send(body with
+        {
+            BloodRequestId = id,
+            HospitalId = hospitalId.Value
+        }, ct);
+
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("requests/pending")]
+    public async Task<IActionResult> GetPending(CancellationToken ct)
+    {
+        var hospitalId = await GetHospitalIdFromJwt(ct);
+        if (hospitalId is null) return Unauthorized();
+
+        var result = await _mediator.Send(
+            new GetPendingRequestsQuery { HospitalId = hospitalId.Value }, ct);
+
+        return Ok(result);
+    }
 }

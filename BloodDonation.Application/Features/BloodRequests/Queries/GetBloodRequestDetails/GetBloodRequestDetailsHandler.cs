@@ -37,7 +37,7 @@ public sealed class GetBloodRequestDetailsHandler
             Notes = br.Notes,
             CreatedAt = br.CreatedAt,
             ExpiresAt = br.ExpiresAt,
-            PatientName = br.User.FullName
+            PatientName = br.PatientName
         };
     }
 }
