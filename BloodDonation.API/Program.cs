@@ -1,7 +1,9 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
 using BloodDonation.Infrastructure.Extensions;
+using BloodDonation.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -12,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration); //استدعاء الـ Extension Method
 
 builder.Services.AddControllers();
 
@@ -36,7 +38,7 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region Authentication
-
+// JWT Authentication setings
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme =
@@ -162,6 +164,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await SeedData.SeedAsync(dbContext);
+}
 
 app.Run();
 
