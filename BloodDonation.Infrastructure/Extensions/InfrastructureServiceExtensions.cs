@@ -12,29 +12,28 @@ namespace BloodDonation.Infrastructure.Extensions;
 public static class InfrastructureServiceExtensions
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
+     this IServiceCollection services,
+     IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
-                sql =>{sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName); }));
+                sql => { sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName); }));
 
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<AppDbContext>());
 
         // Repositories
         services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
-        //services 
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        // تسجيل خدمة المتبرعين في السيرفر
+
+        // Services
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>(); 
         services.AddScoped<IDonorService, DonorService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<INotificationService, NotificationService>();
-
-
-        // Services
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IOcrService, OcrService>();
+        services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();
+        services.AddHostedService<OcrBackgroundService>();
 
         return services;
     }

@@ -12,12 +12,14 @@ public sealed class AcceptBloodRequestCommandHandler
 {
 
     private readonly IApplicationDbContext _dbContext;
-
+    private readonly INotificationService _notificationService;
 
     public AcceptBloodRequestCommandHandler(
-        IApplicationDbContext dbContext)
+        IApplicationDbContext dbContext,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
+        _notificationService = notificationService;
     }
 
     public async Task<bool> Handle(
@@ -60,6 +62,13 @@ public sealed class AcceptBloodRequestCommandHandler
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await _notificationService.CreateAsync(
+    bloodRequest.CreatedByUserId,
+    "Donor Accepted Your Request",
+    "A donor has accepted your blood request.",
+    bloodRequest.Id,
+    "Acceptance",
+    cancellationToken);
 
         return true;
     }

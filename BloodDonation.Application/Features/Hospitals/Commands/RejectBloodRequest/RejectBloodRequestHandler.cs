@@ -49,6 +49,9 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.RejectBloodReque
             if (hospital is null)
                 throw new Exception("Hospital not found");
 
+            if (!hospital.IsActive)
+                throw new UnauthorizedAccessException("Hospital is not active");
+
             if (bloodRequest.HospitalId != hospital.Id)
                 throw new UnauthorizedAccessException();
 

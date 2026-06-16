@@ -11,9 +11,11 @@ public sealed class CreateBloodRequestHandler
     : IRequestHandler<CreateBloodRequestCommand, CreateBloodRequestResponseDto>
 {
     private readonly IApplicationDbContext _dbContext;
-    public CreateBloodRequestHandler(IApplicationDbContext dbContext)
+    private readonly IOcrVerificationQueue _ocrQueue;
+    public CreateBloodRequestHandler(IApplicationDbContext dbContext,IOcrVerificationQueue ocrVerificationQueue)
     {
         _dbContext = dbContext;
+        _ocrQueue = ocrVerificationQueue;
     }
 
     public async Task<CreateBloodRequestResponseDto> Handle(
@@ -60,9 +62,9 @@ public sealed class CreateBloodRequestHandler
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if(!hospitalIsRegistered)
+        if(!hospitalIsRegistered || !hospitalIsActive)
         {
-            //ocr verifcation
+            await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
 
         }
         var message = hospitalIsRegistered

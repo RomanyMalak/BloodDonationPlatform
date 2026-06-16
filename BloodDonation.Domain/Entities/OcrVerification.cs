@@ -1,4 +1,6 @@
-﻿namespace BloodDonation.Domain.Entities;
+﻿using BloodDonation.Domain.Enums;
+
+namespace BloodDonation.Domain.Entities;
 
 public class OcrVerification
 {
@@ -8,6 +10,9 @@ public class OcrVerification
     public double ConfidenceScore { get; set; }
     public string? RawExtractedText { get; set; }
     public string? FailureReason { get; set; }
+    public BloodType? ExtractedBloodType { get; set; }
+    public int? ExtractedUnits { get; set; }
+    public RequestUrgency? ExtractedUrgency { get; set; }
     public DateTime VerifiedAt { get; set; }
     public BloodRequest BloodRequest { get; set; } = null!;
 }  

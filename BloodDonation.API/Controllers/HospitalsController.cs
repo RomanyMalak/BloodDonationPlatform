@@ -1,45 +1,79 @@
 ﻿using BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequest;
 using BloodDonation.Application.Features.Hospitals.Commands.RejectBloodRequest;
+using BloodDonation.Application.Features.Hospitals.Queries.GetPendingRequests;
+using BloodDonation.Application.Interfaces;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
-namespace BloodDonation.API.Controllers
+namespace BloodDonation.API.Controllers;
+
+[ApiController]
+[Route("api/hospitals")]
+[Authorize(Roles = "Hospital")]
+public class HospitalsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class HospitalsController : ControllerBase
+    private readonly IMediator _mediator;
+    private readonly IApplicationDbContext _dbContext;
+
+    public HospitalsController(IMediator mediator, IApplicationDbContext dbContext)
     {
-        private readonly IMediator _mediator;
-        public HospitalsController(IMediator mediator)
+        _mediator = mediator;
+        _dbContext = dbContext;
+    }
+
+    private async Task<Guid?> GetHospitalIdFromJwt(CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return null;
+
+        var hospital = await _dbContext.Hospitals
+            .FirstOrDefaultAsync(h => h.UserId == Guid.Parse(userId), ct);
+
+        return hospital?.Id;
+    }
+
+    [HttpPut("requests/{id}/approve")]
+    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+    {
+        var hospitalId = await GetHospitalIdFromJwt(ct);
+        if (hospitalId is null) return Unauthorized();
+
+        var result = await _mediator.Send(new ApproveBloodRequestCommand
         {
-            _mediator = mediator;
-        }
+            BloodRequestId = id,
+            HospitalId = hospitalId.Value
+        }, ct);
 
-        [HttpPut("requests/{id}/approve")]
-        public async Task<IActionResult> Approve(Guid id,ApproveBloodRequestCommand command)
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPut("requests/{id}/reject")]
+    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectBloodRequestCommand body, CancellationToken ct)
+    {
+        var hospitalId = await GetHospitalIdFromJwt(ct);
+        if (hospitalId is null) return Unauthorized();
+
+        var result = await _mediator.Send(body with
         {
-            command = command with
-            {
-                BloodRequestId = id
-            };
+            BloodRequestId = id,
+            HospitalId = hospitalId.Value
+        }, ct);
 
-            var result = await _mediator.Send(command);
-            return Ok(result);
-        }
+        return result is null ? NotFound() : Ok(result);
+    }
 
-        [HttpPut("requests/{id}/reject")]
-        public async Task<IActionResult> Reject( Guid id,RejectBloodRequestCommand command)
-        {
-            command = command with
-            {
-                BloodRequestId = id
-            };
+    [HttpGet("requests/pending")]
+    public async Task<IActionResult> GetPending(CancellationToken ct)
+    {
+        var hospitalId = await GetHospitalIdFromJwt(ct);
+        if (hospitalId is null) return Unauthorized();
 
-            var result = await _mediator.Send(command);
+        var result = await _mediator.Send(
+            new GetPendingRequestsQuery { HospitalId = hospitalId.Value }, ct);
 
-            return Ok(result);
-        }
-
+        return Ok(result);
     }
 }
