@@ -40,6 +40,9 @@ public class AppDbContext : DbContext, IApplicationDbContext
             entity.Property(x => x.City).HasMaxLength(100);
             entity.Property(x => x.AddressDetail).HasMaxLength(300);
             entity.Property(x => x.IsActive).HasDefaultValue(false);
+            entity.Property(x => x.Status).HasDefaultValue(HospitalStatus.Waiting);
+            entity.Property(x => x.ReviewedAt);
+            entity.Property(x => x.RejectionReason).HasMaxLength(500);
             entity.HasIndex(x => new { x.Name, x.City }).IsUnique();
             entity.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             entity.HasIndex(x => x.UserId).IsUnique();

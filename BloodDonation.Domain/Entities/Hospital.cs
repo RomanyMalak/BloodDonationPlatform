@@ -33,6 +33,11 @@ public class Hospital
     public bool IsActive { get; set; } = false; // لا تفعل إلا بموافقة الأدمن
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // New persistent fields for hospital review workflow
+    public HospitalStatus Status { get; set; } = HospitalStatus.Waiting;
+    public DateTime? ReviewedAt { get; set; }
+    public string? RejectionReason { get; set; }
+
     // 5. العلاقات (Relationships)
     // علاقة (1 to Many) -> المستشفى الواحدة ترتبط بالعديد من طلبات الدم المحجوزة فيها
     public ICollection<BloodRequest> BloodRequests { get; set; } = new List<BloodRequest>();

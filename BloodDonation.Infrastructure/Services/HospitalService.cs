@@ -1,94 +1,101 @@
-//using BloodDonation.Application.DTOs.Hospital;
-//using BloodDonation.Application.Interfaces;
-//using BloodDonation.Domain.Entities;
-//using BloodDonation.Infrastructure.Persistence;
-//using Microsoft.EntityFrameworkCore;
+using BloodDonation.Application.DTOs.Hospital;
+using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
+using BloodDonation.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
-//namespace BloodDonation.Infrastructure.Services;
+namespace BloodDonation.Infrastructure.Services;
 
-//public class HospitalService : IHospitalService
-//{
-//    private readonly AppDbContext _context;
+public class HospitalService : IHospitalService
+{
+    private readonly AppDbContext _context;
 
-//    public HospitalService(AppDbContext context)
-//    {
-//        _context = context;
-//    }
+    public HospitalService(AppDbContext context)
+    {
+        _context = context;
+    }
 
-//    public async Task<List<HospitalDto>> GetAllAsync()
-//    {
-//        return await _context.Hospitals
-//            .OrderByDescending(h => h.CreatedAt)
-//            .Select(h => MapToDto(h))
-//            .ToListAsync();
-//    }
+    public async Task<List<HospitalDto>> GetAllAsync()
+    {
+        return await _context.Hospitals
+            .OrderByDescending(h => h.CreatedAt)
+            .Select(h => MapToDto(h))
+            .ToListAsync();
+    }
 
-//    public async Task<List<HospitalDto>> GetByStatusAsync(HospitalStatus status)
-//    {
-//        return await _context.Hospitals
-//            .Where(h => h.Status == status)
-//            .OrderByDescending(h => h.CreatedAt)
-//            .Select(h => MapToDto(h))
-//            .ToListAsync();
-//    }
+    public async Task<List<HospitalDto>> GetByStatusAsync(HospitalStatus status)
+    {
+        // Domain `Hospital` doesn't have a direct `Status` property in the current model.
+        // Infer the requested status from existing fields (IsActive). For Rejected state
+        // we don't have a persistent flag in the entity, so return empty for Rejected.
+        if (status == HospitalStatus.Rejected)
+        {
+            return new List<HospitalDto>();
+        }
 
-//    public async Task<HospitalDto?> GetByIdAsync(Guid id)
-//    {
-//        var hospital = await _context.Hospitals
-//            .Include(h => h.BloodRequests)
-//            .FirstOrDefaultAsync(h => h.Id == id);
+        return await _context.Hospitals
+            .Where(h => status == HospitalStatus.Active ? h.IsActive : !h.IsActive)
+            .OrderByDescending(h => h.CreatedAt)
+            .Select(h => MapToDto(h))
+            .ToListAsync();
+    }
 
-//        if (hospital == null) return null;
+    public async Task<HospitalDto?> GetByIdAsync(Guid id)
+    {
+        var hospital = await _context.Hospitals
+            .Include(h => h.BloodRequests)
+            .FirstOrDefaultAsync(h => h.Id == id);
 
-//        var dto = MapToDto(hospital);
-//        dto.TotalBloodRequests = hospital.BloodRequests.Count;
-//        return dto;
-//    }
+        if (hospital == null) return null;
 
-//    public async Task<HospitalDto> ApproveAsync(Guid id)
-//    {
-//        var hospital = await _context.Hospitals.FindAsync(id)
-//            ?? throw new Exception($"Hospital with id {id} not found.");
+        var dto = MapToDto(hospital);
+        dto.TotalBloodRequests = hospital.BloodRequests.Count;
+        return dto;
+    }
 
-//        if (hospital.Status == HospitalStatus.Active)
-//            throw new Exception("Hospital is already approved.");
+    public async Task<HospitalDto> ApproveAsync(Guid id)
+    {
+        var hospital = await _context.Hospitals.FindAsync(id)
+            ?? throw new Exception($"Hospital with id {id} not found.");
 
-//        hospital.Status = HospitalStatus.Active;
-//        hospital.ReviewedAt = DateTime.UtcNow;
-//        hospital.RejectionReason = null;
+        if (hospital.IsActive)
+            throw new Exception("Hospital is already approved.");
 
-//        await _context.SaveChangesAsync();
-//        return MapToDto(hospital);
-//    }
+        hospital.IsActive = true;
+        // ReviewedAt / RejectionReason not present on current domain model - cannot set.
 
-//    public async Task<HospitalDto> RejectAsync(Guid id, string? reason)
-//    {
-//        var hospital = await _context.Hospitals.FindAsync(id)
-//            ?? throw new Exception($"Hospital with id {id} not found.");
+        await _context.SaveChangesAsync();
+        return MapToDto(hospital);
+    }
 
-//        if (hospital.Status == HospitalStatus.Rejected)
-//            throw new Exception("Hospital is already rejected.");
+    public async Task<HospitalDto> RejectAsync(Guid id, string? reason)
+    {
+        var hospital = await _context.Hospitals.FindAsync(id)
+            ?? throw new Exception($"Hospital with id {id} not found.");
 
-//        hospital.Status = HospitalStatus.Rejected;
-//        hospital.ReviewedAt = DateTime.UtcNow;
-//        hospital.RejectionReason = reason;
+        if (!hospital.IsActive && string.IsNullOrEmpty(reason))
+            throw new Exception("Hospital is already rejected or no reason provided.");
 
-//        await _context.SaveChangesAsync();
-//        return MapToDto(hospital);
-//    }
+        hospital.IsActive = false;
+        // We do not have persisted ReviewedAt / RejectionReason on Hospital entity in domain.
 
-//    private static HospitalDto MapToDto(Hospital h) => new HospitalDto
-//    {
-//        Id = h.Id,
-//        Name = h.Name,
-//        City = h.City,
-//        Address = h.Address,
-//        Latitude = h.Latitude,
-//        Longitude = h.Longitude,
-//        IsKnown = h.IsKnown,
-//        Status = h.Status,
-//        CreatedAt = h.CreatedAt,
-//        ReviewedAt = h.ReviewedAt,
-//        RejectionReason = h.RejectionReason
-//    };
-//}
+        await _context.SaveChangesAsync();
+        return MapToDto(hospital);
+    }
+
+    private static HospitalDto MapToDto(Hospital h) => new HospitalDto
+    {
+        Id = h.Id,
+        Name = h.Name,
+        City = h.City,
+        Address = h.AddressDetail,
+        Latitude = h.Latitude,
+        Longitude = h.Longitude,
+        // Map existing `IsActive` to DTO's `IsKnown` and infer Status from it.
+        IsKnown = h.IsActive,
+        Status = h.IsActive ? HospitalStatus.Active : HospitalStatus.Waiting,
+        CreatedAt = h.CreatedAt,
+        ReviewedAt = null,
+        RejectionReason = null
+    };
+}
