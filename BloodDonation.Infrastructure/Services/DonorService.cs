@@ -1,6 +1,6 @@
 using BloodDonation.Application.DTOs;
 using BloodDonation.Application.Interfaces;
-using BloodDonation.Domain.Entities;
+
 using BloodDonation.Domain.Enums;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +19,13 @@ public class DonorService : IDonorService
     public async Task<List<DonorNearbyRequestDto>> GetNearbyRequestsAsync(Guid donorId)
     {
         var donor = await _context.Users.FindAsync(donorId);
-        if (donor == null) return new List<DonorNearbyRequestDto>();
+        if (donor == null || donor.Latitude == null || donor.Longitude == null)
+        {
+            return new List<DonorNearbyRequestDto>();
+        }
+
+        var donorLatitude = donor.Latitude.Value;
+        var donorLongitude = donor.Longitude.Value;
 
         var requests = await _context.BloodRequests
             .Include(r => r.Hospital)
@@ -29,7 +35,7 @@ public class DonorService : IDonorService
         var result = requests.Select(r =>
         {
             // Haversine formula to calculate distance
-            //var distanceKm = CalculateDistance(donor.Latitude, donor.Longitude, r.Latitude, r.Longitude);
+            var distanceKm = CalculateDistance(donorLatitude, donorLongitude, r.Latitude, r.Longitude);
             return new DonorNearbyRequestDto
             {
                 Id = r.Id,
@@ -37,7 +43,7 @@ public class DonorService : IDonorService
                 Urgency = r.Urgency.ToString(),
                 Status = r.Status.ToString(),
                 HospitalName = r.Hospital?.Name ?? r.CustomHospitalName ?? "غير محدد",
-              //  DistanceKm = Math.Round(distanceKm, 2),
+                DistanceKm = Math.Round(distanceKm, 2),
                 CreatedAt = r.CreatedAt
             };
         })
