@@ -35,7 +35,7 @@ public class HospitalsController : ControllerBase
         return hospital?.Id;
     }
 
-    [HttpPut("requests/{id}/approve")]
+    [HttpPut("requests/{id}/approveBloodRequest")]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         var hospitalId = await GetHospitalIdFromJwt(ct);
@@ -50,7 +50,7 @@ public class HospitalsController : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
-    [HttpPut("requests/{id}/reject")]
+    [HttpPut("requests/{id}/rejectBloodRequest")]
     public async Task<IActionResult> Reject(Guid id, [FromBody] RejectBloodRequestCommand body, CancellationToken ct)
     {
         var hospitalId = await GetHospitalIdFromJwt(ct);
@@ -65,7 +65,7 @@ public class HospitalsController : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
-    [HttpGet("requests/pending")]
+    [HttpGet("requests/pendingBloodRequest")]
     public async Task<IActionResult> GetPending(CancellationToken ct)
     {
         var hospitalId = await GetHospitalIdFromJwt(ct);

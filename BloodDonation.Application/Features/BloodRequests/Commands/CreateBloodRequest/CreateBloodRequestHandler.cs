@@ -62,7 +62,7 @@ public sealed class CreateBloodRequestHandler
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if(!hospitalIsRegistered || !hospitalIsActive)
+        if(!hospitalIsActive)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
 
