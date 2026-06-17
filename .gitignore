@@ -15,3 +15,4 @@ appsettings.Development.json
 
 TestResults/
 .vscode/
+PublishProfiles/

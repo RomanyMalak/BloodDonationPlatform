@@ -4,6 +4,7 @@ using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BloodDonation.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260616235751_AddHospitalApprovalFields")]
+    partial class AddHospitalApprovalFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,7 +61,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("BloodRequestId");
 
-                    b.ToTable("AiMatchingLogs", (string)null);
+                    b.ToTable("AiMatchingLogs");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.BloodRequest", b =>
@@ -139,7 +142,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("HospitalId");
 
-                    b.ToTable("BloodRequests", (string)null);
+                    b.ToTable("BloodRequests");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.BloodRequestAcceptance", b =>
@@ -170,7 +173,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("BloodRequestId", "DonorId")
                         .IsUnique();
 
-                    b.ToTable("BloodRequestAcceptances", (string)null);
+                    b.ToTable("BloodRequestAcceptances");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.DonationHistory", b =>
@@ -208,7 +211,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("DonationHistories", (string)null);
+                    b.ToTable("DonationHistories");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.Hospital", b =>
@@ -285,7 +288,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("Name", "City")
                         .IsUnique();
 
-                    b.ToTable("Hospitals", (string)null);
+                    b.ToTable("Hospitals");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.Notification", b =>
@@ -326,7 +329,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.OcrVerification", b =>
@@ -369,7 +372,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("BloodRequestId")
                         .IsUnique();
 
-                    b.ToTable("OcrVerifications", (string)null);
+                    b.ToTable("OcrVerifications");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.RefreshToken", b =>
@@ -402,7 +405,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.User", b =>
@@ -458,7 +461,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.UserReport", b =>
@@ -487,7 +490,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("ReporterId");
 
-                    b.ToTable("UserReports", (string)null);
+                    b.ToTable("UserReports");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.AiMatchingLog", b =>

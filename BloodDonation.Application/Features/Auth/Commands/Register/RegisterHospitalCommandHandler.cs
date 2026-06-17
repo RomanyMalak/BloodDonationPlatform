@@ -14,7 +14,8 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
     {
         private readonly IApplicationDbContext _context;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-       public RegisterHospitalCommandHandler(IApplicationDbContext context, IJwtTokenGenerator jwtTokenGenerator)
+
+        public RegisterHospitalCommandHandler(IApplicationDbContext context, IJwtTokenGenerator jwtTokenGenerator)
         {
             _context = context;
             _jwtTokenGenerator = jwtTokenGenerator;
@@ -54,11 +55,21 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
                 LicenseDocumentPath = request.LicenseDocumentPath,
                 UserId = user.Id,
                 IsActive = false,
+                Status = HospitalStatus.Waiting
 
             };
 
             _context.Hospitals.Add(hospital);
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // 💡 حطي النقطة الحمراء (Breakpoint) على السطر اللي تحت ده بالظبط 👇
+                var sqlError = ex.InnerException?.Message ?? ex.Message;
+                throw new Exception(sqlError);
+            }
 
             return  hospital.Id;
         }
