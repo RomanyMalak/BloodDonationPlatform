@@ -3,6 +3,7 @@
 public class BloodRequestSummaryDto
 {
     public Guid Id { get; init; }
+    public string PatientName { get; init; }
     public string RequiredBloodType { get; init; } = null!;
     public string Urgency { get; init; } = null!;
     public string Status { get; init; } = null!;

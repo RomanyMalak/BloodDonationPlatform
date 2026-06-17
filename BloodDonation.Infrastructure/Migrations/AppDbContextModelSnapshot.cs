@@ -67,12 +67,23 @@ namespace BloodDonation.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ApprovedByHospitalId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ContactPhone")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CustomHospitalName")
                         .HasMaxLength(200)
@@ -81,7 +92,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("HospitalId")
+                    b.Property<Guid?>("HospitalId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Latitude")
@@ -98,6 +109,18 @@ namespace BloodDonation.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int?>("PatientAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PatientName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("RequiredBloodType")
                         .HasColumnType("int");
 
@@ -110,14 +133,11 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.Property<int>("Urgency")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("HospitalId");
+                    b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("HospitalId");
 
                     b.ToTable("BloodRequests");
                 });
@@ -218,7 +238,8 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.Property<string>("Hotline")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -230,7 +251,8 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.Property<string>("LicenseDocumentPath")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<double>("Longitude")
                         .HasColumnType("float");
@@ -247,15 +269,20 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.Property<DateTime?>("ReviewedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasDefaultValue(0)
-                        .HasColumnType("int");
+                    b.Property<int?>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.HasIndex("Name", "City")
                         .IsUnique();
 
                     b.ToTable("Hospitals");
@@ -300,6 +327,49 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("BloodDonation.Domain.Entities.OcrVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BloodRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("ConfidenceScore")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("ExtractedBloodType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExtractedUnits")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExtractedUrgency")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RawExtractedText")
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BloodRequestId")
+                        .IsUnique();
+
+                    b.ToTable("OcrVerifications");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.RefreshToken", b =>
@@ -377,7 +447,8 @@ namespace BloodDonation.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -432,21 +503,20 @@ namespace BloodDonation.Infrastructure.Migrations
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.BloodRequest", b =>
                 {
+                    b.HasOne("BloodDonation.Domain.Entities.User", "CreatedByUser")
+                        .WithMany("BloodRequests")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("BloodDonation.Domain.Entities.Hospital", "Hospital")
                         .WithMany("BloodRequests")
                         .HasForeignKey("HospitalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BloodDonation.Domain.Entities.User", "User")
-                        .WithMany("BloodRequests")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("CreatedByUser");
 
                     b.Navigation("Hospital");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.BloodRequestAcceptance", b =>
@@ -523,6 +593,17 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BloodDonation.Domain.Entities.OcrVerification", b =>
+                {
+                    b.HasOne("BloodDonation.Domain.Entities.BloodRequest", "BloodRequest")
+                        .WithOne("OcrVerification")
+                        .HasForeignKey("BloodDonation.Domain.Entities.OcrVerification", "BloodRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BloodRequest");
+                });
+
             modelBuilder.Entity("BloodDonation.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("BloodDonation.Domain.Entities.User", "User")
@@ -562,6 +643,8 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.Navigation("DonationHistories");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("OcrVerification");
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.Hospital", b =>

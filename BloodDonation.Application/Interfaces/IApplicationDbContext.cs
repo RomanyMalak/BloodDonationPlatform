@@ -11,5 +11,6 @@ public interface IApplicationDbContext
     DbSet<Hospital> Hospitals { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<DonationHistory> DonationHistories { get; }
+    DbSet<OcrVerification>  OcrVerifications { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

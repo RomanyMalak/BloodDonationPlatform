@@ -32,7 +32,7 @@ public class BloodRequestsController : ControllerBase
         if (patientId is null) return Unauthorized();
 
         var result = await _mediator.Send(
-             command with { UserId = Guid.Parse(patientId) },
+             command with { CreatedByUserId = Guid.Parse(patientId) },
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
@@ -105,4 +105,6 @@ public class BloodRequestsController : ControllerBase
             ? Ok("Request cancelled successfully.")
             : BadRequest("Unable to cancel this request.");
     }
+
+
 }

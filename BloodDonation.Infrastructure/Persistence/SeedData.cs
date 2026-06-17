@@ -165,8 +165,8 @@ public static class SeedData
             new BloodRequest
             {
                 Id = Guid.NewGuid(),
-                UserId = normalUsers[0].Id,
-                User = normalUsers[0],
+                CreatedByUserId = normalUsers[0].Id,
+                CreatedByUser = normalUsers[0],
                 HospitalId = hospitalProfiles[0].Id,
                 Hospital = hospitalProfiles[0],
                 RequiredBloodType = BloodType.ONegative,
@@ -182,8 +182,8 @@ public static class SeedData
             new BloodRequest
             {
                 Id = Guid.NewGuid(),
-                UserId = normalUsers[1].Id,
-                User = normalUsers[1],
+                CreatedByUserId = normalUsers[1].Id,
+                CreatedByUser = normalUsers[1],
                 HospitalId = hospitalProfiles[1].Id,
                 Hospital = hospitalProfiles[1],
                 RequiredBloodType = BloodType.APositive,
@@ -199,8 +199,8 @@ public static class SeedData
             new BloodRequest
             {
                 Id = Guid.NewGuid(),
-                UserId = normalUsers[2].Id,
-                User = normalUsers[2],
+                CreatedByUserId = normalUsers[2].Id,
+                CreatedByUser = normalUsers[2],
                 HospitalId = hospitalProfiles[2].Id,
                 Hospital = hospitalProfiles[2],
                 RequiredBloodType = BloodType.BPositive,

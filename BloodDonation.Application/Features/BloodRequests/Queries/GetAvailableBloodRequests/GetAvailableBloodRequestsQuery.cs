@@ -1,15 +1,15 @@
 ﻿using BloodDonation.Application.DTOs.BloodRequest;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BloodDonation.Domain.Enums;
 
-namespace BloodDonation.Application.Features.BloodRequests.Queries.GetAvailableBloodRequests
+namespace BloodDonation.Application.Features.BloodRequests.Queries.GetAvailableBloodRequests;
+public sealed record GetAvailableBloodRequestsQuery
+    : IRequest<List<BloodRequestSummaryDto>>
 {
-    public class GetAvailableBloodRequestsQuery : IRequest<List<BloodRequestSummaryDto>>
-    {
-        //هنضيف فيها الداتا اللى هنعمل بيها فيلتر بعدين
-    }
+    public Guid DonorId { get; init; }
+    public BloodType? BloodType { get; init; }
+    public double? Latitude { get; init; }
+    public double? Longitude { get; init; }
+    public double? RadiusKm { get; init; }
+
 }

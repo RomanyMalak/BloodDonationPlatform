@@ -19,7 +19,7 @@ namespace BloodDonation.Infrastructure.Repositories
         public async Task<BloodRequest?> GetWithAcceptancesAsync(Guid id)
         {
             return await _context.BloodRequests
-                .Include(br => br.User)
+                .Include(br => br.CreatedByUser)
                 .Include(br => br.Hospital)
                 .Include(br => br.Acceptances)
                 .FirstOrDefaultAsync(br => br.Id == id);
