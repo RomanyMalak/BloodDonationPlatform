@@ -34,7 +34,7 @@ public class Hospital
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // New persistent fields for hospital review workflow
-    public HospitalStatus Status { get; set; } = HospitalStatus.Waiting;
+    public HospitalStatus? Status { get; set; }
     public DateTime? ReviewedAt { get; set; }
     public string? RejectionReason { get; set; }
 
