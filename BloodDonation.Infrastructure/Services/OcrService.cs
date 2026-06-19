@@ -118,8 +118,7 @@ public class OcrService : IOcrService
 
     private Task<string> ExtractTextAsync(string? documentUrl)
     {
-        // دلوقتي: نص تجريبي للتست
-        // لاحقاً: Tesseract أو Azure Vision
+        // free plan هنستخدامه بس هو عايز ان ندخل فيزا ف ال  Azure Vision ده فيك للتجربه حاليا ولما اعرف اعمل اكونت ع 
         var fakeText =
             "Patient: محمد علي\n" +
             "Blood Group: A+\n" +
