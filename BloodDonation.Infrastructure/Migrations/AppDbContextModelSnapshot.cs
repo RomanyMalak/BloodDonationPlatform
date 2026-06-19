@@ -58,7 +58,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("BloodRequestId");
 
-                    b.ToTable("AiMatchingLogs");
+                    b.ToTable("AiMatchingLogs", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.BloodRequest", b =>
@@ -139,7 +139,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("HospitalId");
 
-                    b.ToTable("BloodRequests");
+                    b.ToTable("BloodRequests", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.BloodRequestAcceptance", b =>
@@ -170,7 +170,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("BloodRequestId", "DonorId")
                         .IsUnique();
 
-                    b.ToTable("BloodRequestAcceptances");
+                    b.ToTable("BloodRequestAcceptances", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.DonationHistory", b =>
@@ -208,7 +208,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("DonationHistories");
+                    b.ToTable("DonationHistories", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.Hospital", b =>
@@ -285,7 +285,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("Name", "City")
                         .IsUnique();
 
-                    b.ToTable("Hospitals");
+                    b.ToTable("Hospitals", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.Notification", b =>
@@ -326,7 +326,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.OcrVerification", b =>
@@ -369,7 +369,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("BloodRequestId")
                         .IsUnique();
 
-                    b.ToTable("OcrVerifications");
+                    b.ToTable("OcrVerifications", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.RefreshToken", b =>
@@ -402,7 +402,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.User", b =>
@@ -458,7 +458,7 @@ namespace BloodDonation.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.UserReport", b =>
@@ -487,7 +487,7 @@ namespace BloodDonation.Infrastructure.Migrations
 
                     b.HasIndex("ReporterId");
 
-                    b.ToTable("UserReports");
+                    b.ToTable("UserReports", (string)null);
                 });
 
             modelBuilder.Entity("BloodDonation.Domain.Entities.AiMatchingLog", b =>

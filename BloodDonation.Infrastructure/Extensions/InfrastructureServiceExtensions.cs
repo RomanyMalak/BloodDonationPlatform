@@ -30,6 +30,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>(); 
         services.AddScoped<IDonorService, DonorService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IHospitalService, HospitalService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IOcrService, OcrService>();
         services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();

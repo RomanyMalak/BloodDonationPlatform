@@ -16,8 +16,6 @@ public sealed class VerifyBloodRequestDocumentHandler
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrService _ocrService;
     private readonly INotificationService _notificationService;
-
-
     public VerifyBloodRequestDocumentHandler(
         IApplicationDbContext dbContext,
         IOcrService ocrService,
@@ -30,107 +28,79 @@ public sealed class VerifyBloodRequestDocumentHandler
 
 
 
-    public async Task<OcrResultDto> Handle(
-        VerifyBloodRequestDocumentCommand request,
-        CancellationToken cancellationToken)
+    public async Task<OcrResultDto> Handle(VerifyBloodRequestDocumentCommand request,CancellationToken cancellationToken)
     {
-
-        var bloodRequest =
-            await _dbContext.BloodRequests
+        // ١. جيب الطلب مع بيانات المستشفى
+        var bloodRequest = await _dbContext.BloodRequests
+            .Include(x => x.Hospital)
             .FirstOrDefaultAsync(
                 x => x.Id == request.BloodRequestId,
                 cancellationToken);
 
-
         if (bloodRequest is null)
             throw new Exception("Blood request not found");
 
+        //OCR ٢. جهز البيانات للـ 
+        var hospitalName =
+            bloodRequest.Hospital?.Name ??
+            bloodRequest.CustomHospitalName;
 
+        //مع بيانات الطلبOCR ٣. شغل الـ  
+        var result = await _ocrService.VerifyAsync(
+            bloodRequest.MedicalDocumentUrl,
+            bloodRequest.PatientName,       
+            hospitalName,                     
+            bloodRequest.RequiredBloodType.ToString(), 
+            cancellationToken);
 
-        var result =
-            await _ocrService.VerifyAsync(
-                bloodRequest.Id,
-                cancellationToken);
-
-
-
+        //OCR ٤. احفظ نتيجة الـ 
         var verification = new OcrVerification
         {
             Id = Guid.NewGuid(),
-
             BloodRequestId = bloodRequest.Id,
-
             IsVerified = result.IsVerified,
-
             ConfidenceScore = result.ConfidenceScore,
-
             RawExtractedText = result.RawText,
-
             FailureReason = result.FailureReason,
-
             ExtractedBloodType = result.ExtractedBloodType,
-
             ExtractedUnits = result.ExtractedUnits,
-
             ExtractedUrgency = result.ExtractedUrgency,
-
             VerifiedAt = DateTime.UtcNow
         };
 
-
         await _dbContext.OcrVerifications
-            .AddAsync(
-                verification,
-                cancellationToken);
+            .AddAsync(verification, cancellationToken);
 
-
-
+        // Status + Urgency ٥. غير 
         if (result.IsVerified)
         {
             bloodRequest.Status = RequestStatus.Approved;
 
-
-            // رفع مستوى الخطورة فقط لو الـ OCR اكتشف حالة أخطر
             if (result.ExtractedUrgency.HasValue &&
                 (int)result.ExtractedUrgency.Value >
                 (int)bloodRequest.Urgency)
             {
-                bloodRequest.Urgency =
-                    result.ExtractedUrgency.Value;
+                bloodRequest.Urgency = result.ExtractedUrgency.Value;
             }
-
 
             await _notificationService.CreateAsync(
                 bloodRequest.CreatedByUserId,
-                "Request Verified",
-                "Your blood request document has been approved.",
-                bloodRequest.Id,
-                "OCR",
-                cancellationToken);
+                "تم قبول طلبك",
+                "تم التحقق من وثيقتك بنجاح.",
+                bloodRequest.Id, "OCR", cancellationToken);
         }
         else
         {
-            bloodRequest.Status =
-                RequestStatus.Rejected;
-
+            bloodRequest.Status = RequestStatus.Rejected;
 
             await _notificationService.CreateAsync(
                 bloodRequest.CreatedByUserId,
-                "Request Rejected",
-                result.FailureReason ??
-                "Document verification failed.",
-                bloodRequest.Id,
-                "OCR",
-                cancellationToken);
+                "تم رفض طلبك",
+                result.FailureReason ?? "Document verification failed.",
+                bloodRequest.Id, "OCR", cancellationToken);
         }
 
-
-
-        await _dbContext.SaveChangesAsync(
-            cancellationToken);
-
-
-
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return result;
     }
 }

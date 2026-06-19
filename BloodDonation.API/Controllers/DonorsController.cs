@@ -1,4 +1,5 @@
 using BloodDonation.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -6,6 +7,7 @@ namespace BloodDonation.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class DonorsController : ControllerBase
 {
     private readonly IDonorService _donorService;
