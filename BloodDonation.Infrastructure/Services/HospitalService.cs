@@ -1,4 +1,4 @@
-using BloodDonation.Application.DTOs.Hospital;
+﻿using BloodDonation.Application.DTOs.Hospital;
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Infrastructure.Persistence;
@@ -15,69 +15,68 @@ public class HospitalService : IHospitalService
         _context = context;
     }
 
+    // جيب كل المستشفيات
     public async Task<List<HospitalDto>> GetAllAsync()
     {
         return await _context.Hospitals
+            .Include(h => h.BloodRequests)
             .OrderByDescending(h => h.CreatedAt)
             .Select(h => MapToDto(h))
             .ToListAsync();
     }
 
+    // جيب المستشفيات بناءً على الـ Status
     public async Task<List<HospitalDto>> GetByStatusAsync(HospitalStatus status)
     {
-        // Domain `Hospital` doesn't have a direct `Status` property in the current model.
-        // Infer the requested status from existing fields (IsActive). For Rejected state
-        // we don't have a persistent flag in the entity, so return empty for Rejected.
-        if (status == HospitalStatus.Rejected)
-        {
-            return new List<HospitalDto>();
-        }
-
         return await _context.Hospitals
-            .Where(h => status == HospitalStatus.Active ? h.IsActive : !h.IsActive)
+            .Include(h => h.BloodRequests)
+            .Where(h => h.Status == status)
             .OrderByDescending(h => h.CreatedAt)
             .Select(h => MapToDto(h))
             .ToListAsync();
     }
 
+    // جيب مستشفى واحد بالـ ID
     public async Task<HospitalDto?> GetByIdAsync(Guid id)
     {
         var hospital = await _context.Hospitals
             .Include(h => h.BloodRequests)
             .FirstOrDefaultAsync(h => h.Id == id);
 
-        if (hospital == null) return null;
-
-        var dto = MapToDto(hospital);
-        dto.TotalBloodRequests = hospital.BloodRequests.Count;
-        return dto;
+        return hospital == null ? null : MapToDto(hospital);
     }
 
+    // الأدمن يوافق على مستشفى
     public async Task<HospitalDto> ApproveAsync(Guid id)
     {
         var hospital = await _context.Hospitals.FindAsync(id)
-            ?? throw new Exception($"Hospital with id {id} not found.");
+            ?? throw new Exception($"Hospital {id} not found.");
 
-        if (hospital.IsActive)
+        if (hospital.Status == HospitalStatus.Active)
             throw new Exception("Hospital is already approved.");
 
+        hospital.Status = HospitalStatus.Active;
         hospital.IsActive = true;
-        // ReviewedAt / RejectionReason not present on current domain model - cannot set.
+        hospital.ReviewedAt = DateTime.UtcNow;
+        hospital.RejectionReason = null;
 
         await _context.SaveChangesAsync();
         return MapToDto(hospital);
     }
 
+    // الأدمن يرفض مستشفى
     public async Task<HospitalDto> RejectAsync(Guid id, string? reason)
     {
         var hospital = await _context.Hospitals.FindAsync(id)
-            ?? throw new Exception($"Hospital with id {id} not found.");
+            ?? throw new Exception($"Hospital {id} not found.");
 
-        if (!hospital.IsActive && string.IsNullOrEmpty(reason))
-            throw new Exception("Hospital is already rejected or no reason provided.");
+        if (hospital.Status == HospitalStatus.Rejected)
+            throw new Exception("Hospital is already rejected.");
 
+        hospital.Status = HospitalStatus.Rejected;
         hospital.IsActive = false;
-        // We do not have persisted ReviewedAt / RejectionReason on Hospital entity in domain.
+        hospital.ReviewedAt = DateTime.UtcNow;
+        hospital.RejectionReason = reason;
 
         await _context.SaveChangesAsync();
         return MapToDto(hospital);
@@ -91,11 +90,11 @@ public class HospitalService : IHospitalService
         Address = h.AddressDetail,
         Latitude = h.Latitude,
         Longitude = h.Longitude,
-        // Map existing `IsActive` to DTO's `IsKnown` and infer Status from it.
         IsKnown = h.IsActive,
-        Status = h.IsActive ? HospitalStatus.Active : HospitalStatus.Waiting,
+        Status = (HospitalStatus)h.Status,
         CreatedAt = h.CreatedAt,
-        ReviewedAt = null,
-        RejectionReason = null
+        ReviewedAt = h.ReviewedAt,
+        RejectionReason = h.RejectionReason,
+        TotalBloodRequests = h.BloodRequests?.Count ?? 0
     };
 }
