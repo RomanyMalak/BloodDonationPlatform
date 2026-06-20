@@ -1,8 +1,10 @@
 ﻿using BloodDonation.Application.Interfaces;
 using BloodDonation.Application.Interfaces.Repositories;
+using BloodDonation.Infrastructure.Hubs;
 using BloodDonation.Infrastructure.Persistence;
 using BloodDonation.Infrastructure.Repositories;
 using BloodDonation.Infrastructure.Services;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,8 +31,14 @@ public static class InfrastructureServiceExtensions
         // Services
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>(); 
         services.AddScoped<IDonorService, DonorService>();
+        services.AddScoped<IDonorMatchingService, DonorMatchingService>();
+        services.AddScoped<IAiMatchingPipelineService, NotificationAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<INotificationSender, SignalRNotificationSender>();
+        services.AddSingleton<IUserIdProvider, NotificationUserIdProvider>();
+        services.AddSingleton<INotificationAgentQueue, NotificationAgentQueue>();
+        services.AddHostedService<NotificationAgentBackgroundService>();
         services.AddScoped<IOcrService, OcrService>();
         services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();
         services.AddHostedService<OcrBackgroundService>();
