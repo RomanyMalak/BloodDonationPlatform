@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,6 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
      double Latitude,
      double Longitude,
      string Hotline,
-     string LicenseDocumentPath
+    IFormFile LicenseDocumentPath
  ) : IRequest<Guid>;
 }
