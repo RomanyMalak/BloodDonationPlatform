@@ -1,6 +1,7 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
 using BloodDonation.Infrastructure.Extensions;
+using BloodDonation.Infrastructure.Hubs;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -166,6 +167,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())
 {
