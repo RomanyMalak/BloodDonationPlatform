@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest;
 
-public sealed class CreateBloodRequestHandler
-    : IRequestHandler<CreateBloodRequestCommand, CreateBloodRequestResponseDto>
+public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodRequestCommand, CreateBloodRequestResponseDto>
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrVerificationQueue _ocrQueue;
@@ -18,25 +17,19 @@ public sealed class CreateBloodRequestHandler
         _ocrQueue = ocrVerificationQueue;
     }
 
-    public async Task<CreateBloodRequestResponseDto> Handle(
-        CreateBloodRequestCommand request,
-        CancellationToken cancellationToken)
+    public async Task<CreateBloodRequestResponseDto> Handle(CreateBloodRequestCommand request, CancellationToken cancellationToken)
     {
-        bool hospitalIsRegistered = false;
-        if(request.HospitalId.HasValue)
-        {
-            hospitalIsRegistered = await _dbContext.Hospitals.AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
-
-        }
-        var user = await _dbContext.Users.FirstAsync( x => x.Id == request.CreatedByUserId,cancellationToken);
-
-        bool hospitalIsActive = false;
+        bool hospitalCanApprove = false;
         if (request.HospitalId.HasValue)
         {
-            hospitalIsActive = await _dbContext.Hospitals.AnyAsync(
-                    h => h.Id == request.HospitalId.Value && h.IsActive,cancellationToken);
+            hospitalCanApprove = await _dbContext.Hospitals
+                .AnyAsync(h =>
+                    h.Id == request.HospitalId.Value &&
+                    h.IsActive,  
+                    cancellationToken);
         }
 
+        var user = await _dbContext.Users.FirstAsync(x => x.Id == request.CreatedByUserId, cancellationToken);
 
         var bloodRequest = new BloodRequest
         {
@@ -62,12 +55,12 @@ public sealed class CreateBloodRequestHandler
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if(!hospitalIsRegistered || !hospitalIsActive)
+        if(!hospitalCanApprove)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
 
         }
-        var message = hospitalIsRegistered
+        var message = hospitalCanApprove
         ? "Request submitted. Waiting for hospital approval."
         : "Request submitted. Document verification in progress.";
 

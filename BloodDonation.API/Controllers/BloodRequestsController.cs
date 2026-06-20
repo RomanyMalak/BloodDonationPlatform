@@ -1,5 +1,7 @@
+using BloodDonation.Application.DTOs.BloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Commands.AcceptBloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Commands.CancelBloodRequest;
+using BloodDonation.Application.Features.BloodRequests.Commands.CompleteDonation;
 using BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Queries.GetAvailableBloodRequests;
 using BloodDonation.Application.Features.BloodRequests.Queries.GetBloodRequestDetails;
@@ -63,7 +65,7 @@ public class BloodRequestsController : ControllerBase
     }
 
     // POST api/blood-requests/{id}/accept
-    [HttpPost("{id:guid}/accept")]
+    [HttpPost("{id:guid}/acceptBloodRequest")]
     public async Task<IActionResult> Accept(
         Guid id,
         CancellationToken cancellationToken)
@@ -85,7 +87,7 @@ public class BloodRequestsController : ControllerBase
     }
 
     // PUT api/blood-requests/{id}/cancel
-    [HttpPut("{id:guid}/cancel")]
+    [HttpPut("{id:guid}/cancelBloodRequest")]
     public async Task<IActionResult> Cancel(
         Guid id,
         CancellationToken cancellationToken)
@@ -106,5 +108,27 @@ public class BloodRequestsController : ControllerBase
             : BadRequest("Unable to cancel this request.");
     }
 
+    [HttpPost("{id:guid}/completeBloodRequest")]
+    public async Task<IActionResult> Complete(
+        Guid id,
+        [FromBody] CompleteDonationRequest body,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Unauthorized();
 
+        var result = await _mediator.Send(
+            new CompleteDonationCommand
+            {
+                BloodRequestId = id,
+                DonorId = body.DonorId,
+                CompletedByUserId = Guid.Parse(userId),
+                Notes = body.Notes
+            },
+            cancellationToken);
+
+        return result
+            ? Ok("Donation completed successfully.")
+            : BadRequest("Unable to complete this donation.");
+    }
 }

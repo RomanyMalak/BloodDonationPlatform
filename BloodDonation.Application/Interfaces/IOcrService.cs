@@ -1,16 +1,14 @@
-﻿using BloodDonation.Application.DTOs.Ocr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Application/Interfaces/IOcrService.cs
+using BloodDonation.Application.DTOs.Ocr;
 
-namespace BloodDonation.Application.Interfaces
+namespace BloodDonation.Application.Interfaces;
+
+public interface IOcrService
 {
-    public interface IOcrService
-    {
-        Task<OcrResultDto> VerifyAsync(
-            Guid bloodRequestId,
-            CancellationToken cancellationToken);
-    }
+    Task<OcrResultDto> VerifyAsync(
+        string? documentUrl,
+        string patientName,
+        string? hospitalName,
+        string bloodType,
+        CancellationToken cancellationToken);
 }
