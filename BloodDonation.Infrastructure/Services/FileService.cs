@@ -18,7 +18,7 @@ namespace BloodDonation.Infrastructure.Services
         {
            
             if (file == null || file.Length == 0)
-                throw new ArgumentException("File is empty."); 
+                return null; // No file uploaded, return null or handle as needed.
 
             // Get file extension in lower-case for validation.
             var extension = Path.GetExtension(file.FileName).ToLower();
