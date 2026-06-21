@@ -20,7 +20,7 @@ public class AuthController: ControllerBase
         return Ok(result);
     }
     [HttpPost("register/Hospital")]
-    public async Task<IActionResult> Register([FromBody]RegisterHospitalCommand command)
+    public async Task<IActionResult> Register([FromForm] RegisterHospitalCommand command)
     {
         var result = await _mediator.Send(command);
         return Ok(result);

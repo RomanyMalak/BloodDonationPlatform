@@ -1,12 +1,13 @@
 ﻿using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Entities;
+using BloodDonation.Domain.Enums;
+using BloodDonation.Infrastructure.Services;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BloodDonation.Domain.Entities;
-using BloodDonation.Domain.Enums;
 
 namespace BloodDonation.Application.Features.Auth.Commands.Register
 {
@@ -14,11 +15,12 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
     {
         private readonly IApplicationDbContext _context;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly IFileService _fileService; // 1️⃣ عملنا Inject للخدمة المركزية هنا
 
-        public RegisterHospitalCommandHandler(IApplicationDbContext context, IJwtTokenGenerator jwtTokenGenerator)
-        {
+        public RegisterHospitalCommandHandler(IApplicationDbContext context, IJwtTokenGenerator jwtTokenGenerator,IFileService fileService)       {
             _context = context;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _fileService = fileService;
         }
         public async Task<Guid> Handle(RegisterHospitalCommand request, CancellationToken cancellationToken)
         {
@@ -29,6 +31,8 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
                     throw new Exception("Email already exists.");
                 }
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            // 2️⃣ رفع الملف باستخدام الخدمة المركزية والحصول على المسار الذي سيتم تخزينه في قاعدة البيانات
+            string savedDbPath = await _fileService.UploadFileAsync(request.LicenseDocumentPath, "licenses", cancellationToken);
 
             var user = new User
             {
@@ -52,7 +56,7 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 Hotline = request.Hotline,
-                LicenseDocumentPath = request.LicenseDocumentPath,
+                LicenseDocumentPath = savedDbPath,// 3️⃣ بنخزن المسار اللي رجع من الخدمة المركزية في قاعدة البيانات
                 UserId = user.Id,
                 IsActive = false,
                 Status = HospitalStatus.Waiting
