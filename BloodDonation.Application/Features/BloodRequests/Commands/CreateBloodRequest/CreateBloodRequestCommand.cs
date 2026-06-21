@@ -1,6 +1,7 @@
 ﻿using BloodDonation.Application.DTOs.BloodRequest;
 using BloodDonation.Domain.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
     public sealed record CreateBloodRequestCommand
      : IRequest<CreateBloodRequestResponseDto>
     {
-        public string PatientName { get; init; } = string.Empty;
+        public string PatientName { get; init; }
 
         public int? PatientAge { get; init; }
 
@@ -28,7 +29,7 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
 
         public double Longitude { get; init; }
 
-        public string? MedicalDocumentUrl { get; init; }
+        public IFormFile MedicalDocumentUrl { get; init; }
 
         public string? Notes { get; init; }
 
