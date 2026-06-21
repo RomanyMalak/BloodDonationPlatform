@@ -1,45 +1,59 @@
 ﻿using BloodDonation.Application.DTOs.Ocr;
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Enums;
-using static System.Net.Mime.MediaTypeNames;
+using Tesseract;
+
+namespace BloodDonation.Infrastructure.Services;
 
 public class OcrService : IOcrService
 {
     private static readonly string[] MedicalKeywords =
-{
-    // طبي عام
-    "تشخيص", "مستشفى", "طبيب", "دكتور", "مريض",
-    "وصفة", "علاج", "جراحة", "عملية", "طوارئ",
-    "تحليل", "أشعة", "نتيجة", "تقرير طبي",
-    "وحدة دم", "نقل دم", "فصيلة", "بنك الدم",
+    {
+        // طبي عام
+        "تشخيص", "مستشفى", "طبيب", "دكتور", "مريض",
+        "وصفة", "علاج", "جراحة", "عملية", "طوارئ",
+        "تحليل", "أشعة", "نتيجة", "تقرير طبي",
+        "وحدة دم", "نقل دم", "فصيلة", "بنك الدم",
 
-    //  تخصصات
-    "باطنة", "جراحة", "عظام", "قلب", "أورام",
-    "نسا وتوليد", "أطفال", "عيون", "كلى",
+        // تخصصات
+        "باطنة", "عظام", "قلب", "أورام",
+        "نسا وتوليد", "أطفال", "عيون", "كلى",
 
-    // حالة المريض
-    "نزيف", "حادث", "إصابة", "فقر دم", "أنيميا",
-    "ضغط", "سكر", "فشل كلوي", "زراعة",
+        // حالة المريض
+        "نزيف", "حادث", "إصابة", "فقر دم", "أنيميا",
+        "ضغط", "سكر", "فشل كلوي", "زراعة",
 
-    //  طبي عام
-    "diagnosis", "hospital", "doctor", "patient",
-    "blood", "medical", "report", "prescription",
-    "treatment", "surgery", "operation", "emergency",
-    "laboratory", "analysis", "result", "clinic",
+        // طبي عام إنجليزي
+        "diagnosis", "hospital", "doctor", "patient",
+        "blood", "medical", "report", "prescription",
+        "treatment", "surgery", "operation", "emergency",
+        "laboratory", "analysis", "result", "clinic",
 
-    //  دم تحديداً
-    "blood type", "blood group", "blood bank",
-    "transfusion", "units", "hemoglobin",
-    "anemia", "hemorrhage", "bleeding",
+        // دم تحديداً
+        "blood type", "blood group", "blood bank",
+        "transfusion", "units", "hemoglobin",
+        "anemia", "hemorrhage", "bleeding",
 
-    //  تخصصات
-    "internal medicine", "orthopedic", "cardiology",
-    "oncology", "nephrology", "pediatric",
+        // تخصصات إنجليزي
+        "internal medicine", "orthopedic", "cardiology",
+        "oncology", "nephrology", "pediatric",
 
-    //  حالة المريض
-    "icu", "critical", "urgent", "accident",
-    "injury", "trauma", "kidney failure"
-};
+        // حالة المريض إنجليزي
+        "icu", "critical", "urgent", "accident",
+        "injury", "trauma", "kidney failure"
+    };
+
+    private static readonly Dictionary<string, string> BloodTypeSymbols = new()
+    {
+        { "APositive",  "A+"  },
+        { "ANegative",  "A-"  },
+        { "BPositive",  "B+"  },
+        { "BNegative",  "B-"  },
+        { "ABPositive", "AB+" },
+        { "ABNegative", "AB-" },
+        { "OPositive",  "O+"  },
+        { "ONegative",  "O-"  }
+    };
 
     public async Task<OcrResultDto> VerifyAsync(
         string? documentUrl,
@@ -68,12 +82,11 @@ public class OcrService : IOcrService
             return result;
         }
 
-
+        // ٣. تحقق من الكلمات الطبية
         int matchCount = MedicalKeywords.Count(k =>
             extractedText.Contains(k, StringComparison.OrdinalIgnoreCase));
 
-        bool hasMedical = matchCount >= 3;
-        if (!hasMedical)
+        if (matchCount < 3)
         {
             result.IsVerified = false;
             result.FailureReason = "No medical content detected.";
@@ -97,7 +110,8 @@ public class OcrService : IOcrService
 
         // ٥. تحقق من المستشفى
         if (hospitalName is not null &&
-            !extractedText.Contains(hospitalName, StringComparison.OrdinalIgnoreCase))
+            !extractedText.Contains(
+                hospitalName, StringComparison.OrdinalIgnoreCase))
         {
             result.IsVerified = false;
             result.FailureReason = "Hospital name not found in document.";
@@ -105,7 +119,11 @@ public class OcrService : IOcrService
         }
 
         // ٦. تحقق من فصيلة الدم
-        if (!extractedText.Contains(bloodType, StringComparison.OrdinalIgnoreCase))
+        var bloodTypeSymbol = BloodTypeSymbols.TryGetValue(
+            bloodType, out var symbol) ? symbol : bloodType;
+
+        if (!extractedText.Contains(
+                bloodTypeSymbol, StringComparison.OrdinalIgnoreCase))
         {
             result.IsVerified = false;
             result.FailureReason = "Blood type mismatch in document.";
@@ -116,24 +134,54 @@ public class OcrService : IOcrService
         return result;
     }
 
-    private Task<string> ExtractTextAsync(string? documentUrl)
+    private async Task<string> ExtractTextAsync(string? documentUrl)
     {
-        // free plan هنستخدامه بس هو عايز ان ندخل فيزا ف ال  Azure Vision ده فيك للتجربه حاليا ولما اعرف اعمل اكونت ع 
-        var fakeText =
-            "Patient: محمد علي\n" +
-            "Blood Group: A+\n" +
-            "Hospital: مستشفى القاهرة\n" +
-            "Diagnosis: Emergency surgery required\n" +
-            "Units Required: 2";
+        if (string.IsNullOrEmpty(documentUrl))
+            return string.Empty;
 
-        return Task.FromResult(fakeText);
+        try
+        {
+            var tessDataPath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "tessdata");
+
+            byte[] fileBytes;
+
+            if (documentUrl.StartsWith("http",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                using var httpClient = new HttpClient();
+                fileBytes = await httpClient
+                    .GetByteArrayAsync(documentUrl);
+            }
+            else
+            {
+                fileBytes = await File.ReadAllBytesAsync(documentUrl);
+            }
+
+            using var engine = new TesseractEngine(
+                tessDataPath, "ara+eng", EngineMode.Default);
+
+            using var img = Pix.LoadFromMemory(fileBytes);
+            using var page = engine.Process(img);
+
+            return page.GetText();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"OCR Error: {ex.Message}");
+            return string.Empty;
+        }
     }
 
     private double CalculateScore(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return 0;
-        var words = text.Split(' ',
-            StringSplitOptions.RemoveEmptyEntries).Length;
+
+        var words = text
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Length;
+
         return words switch
         {
             > 50 => 0.95,
@@ -159,10 +207,10 @@ public class OcrService : IOcrService
 
     private int? ExtractUnits(string text)
     {
-        // ✅ بندور على pattern "X units" أو "X وحدة"
-        var match = System.Text.RegularExpressions
-            .Regex.Match(text, @"(\d+)\s*(units|وحدة|unit)",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        var match = System.Text.RegularExpressions.Regex.Match(
+            text,
+            @"(\d+)\s*(units|وحدة|unit)",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
         if (match.Success &&
             int.TryParse(match.Groups[1].Value, out int units))
@@ -180,6 +228,7 @@ public class OcrService : IOcrService
             text.Contains("surgery") ||
             text.Contains("icu") ||
             text.Contains("طارئ") ||
+            text.Contains("نزيف") ||
             text.Contains("حرج"))
             return RequestUrgency.Critical;
 
