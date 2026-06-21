@@ -18,8 +18,9 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
                 .MaximumLength(11).WithMessage("Contact phone must not exceed 11 characters.");
 
             RuleFor(x => x.MedicalDocumentUrl)
-                .NotEmpty().WithMessage("Medical document URL is required.")
-                .MaximumLength(500).WithMessage("Medical document URL must not exceed 500 characters.");
+                .NotEmpty().WithMessage("Medical document is required.")
+                .Must(file => file == null || file.Length <= 10 * 1024 * 1024)
+                .WithMessage("File size must not exceed 10 MB.");
 
             RuleFor(x => x.ExpiresAt)
                 .NotEmpty().WithMessage("Expiry date is required.")
