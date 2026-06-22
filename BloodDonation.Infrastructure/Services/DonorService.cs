@@ -90,5 +90,44 @@ public class DonorService : IDonorService
         return R * c;
     }
 
+    // This method returns a list of eligible donors based on the required blood type.
+    public async Task<List<EligibleDonorDto>> GetEligibleDonorsAsync(BloodType bloodType)
+    {
+        var compatibilityMatrix = new Dictionary<BloodType, List<BloodType>>
+    {
+        { BloodType.APositive,  new() { BloodType.APositive, BloodType.ANegative, BloodType.OPositive, BloodType.ONegative } },
+        { BloodType.ANegative,  new() { BloodType.ANegative, BloodType.ONegative } },
+        { BloodType.BPositive,  new() { BloodType.BPositive, BloodType.BNegative, BloodType.OPositive, BloodType.ONegative } },
+        { BloodType.BNegative,  new() { BloodType.BNegative, BloodType.ONegative } },
+        { BloodType.ABPositive, new() { BloodType.APositive, BloodType.ANegative, BloodType.BPositive, BloodType.BNegative,
+                                        BloodType.ABPositive, BloodType.ABNegative, BloodType.OPositive, BloodType.ONegative } },
+        { BloodType.ABNegative, new() { BloodType.ANegative, BloodType.BNegative, BloodType.ABNegative, BloodType.ONegative } },
+        { BloodType.OPositive,  new() { BloodType.OPositive, BloodType.ONegative } },
+        { BloodType.ONegative,  new() { BloodType.ONegative } }
+    };
+
+        var compatibleTypes = compatibilityMatrix[bloodType];
+        var cutoffDate = DateTime.UtcNow.AddDays(-90);
+
+        return await _context.Users
+            .Where(u =>
+                u.BloodType.HasValue &&
+                compatibleTypes.Contains(u.BloodType.Value) &&
+                u.IsAvailable == true &&
+                u.Role == UserRole.User &&
+                (u.LastDonationDate == null || u.LastDonationDate <= cutoffDate))
+            .Select(u => new EligibleDonorDto
+            {
+                Id = u.Id,
+                FullName = u.FullName,
+                BloodType = u.BloodType.ToString(),
+                LastDonationDate = u.LastDonationDate,
+                Latitude = u.Latitude,
+                Longitude = u.Longitude,
+                Phone = u.Phone
+            })
+            .ToListAsync();
+    }
+
     private static double ToRad(double deg) => deg * Math.PI / 180;
 }

@@ -1,4 +1,5 @@
 using BloodDonation.Application.Interfaces;
+using BloodDonation.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -54,6 +55,14 @@ public class DonorsController : ControllerBase
 
         var history = await _donorService.GetDonationHistoryAsync(donorId.Value);
         return Ok(history);
+    }
+    // GET /api/donors/eligible?bloodType=A+
+    [AllowAnonymous]
+    [HttpGet("eligible")]
+    public async Task<IActionResult> GetEligibleDonors([FromQuery] BloodType bloodType)
+    {
+        var donors = await _donorService.GetEligibleDonorsAsync(bloodType);
+        return Ok(donors);
     }
 
     private Guid? GetCurrentUserId()
