@@ -16,14 +16,18 @@ public sealed class VerifyBloodRequestDocumentHandler
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrService _ocrService;
     private readonly INotificationService _notificationService;
+    private readonly INotificationAgentQueue _notificationAgentQueue;
+
     public VerifyBloodRequestDocumentHandler(
         IApplicationDbContext dbContext,
         IOcrService ocrService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        INotificationAgentQueue notificationAgentQueue)
     {
         _dbContext = dbContext;
         _ocrService = ocrService;
         _notificationService = notificationService;
+        _notificationAgentQueue = notificationAgentQueue;
     }
 
 
@@ -74,7 +78,7 @@ public sealed class VerifyBloodRequestDocumentHandler
         // Status + Urgency ٥. غير 
         if (result.IsVerified)
         {
-            bloodRequest.Status = RequestStatus.Approved;
+            bloodRequest.Status = RequestStatus.Matching;
 
             if (result.ExtractedUrgency.HasValue &&
                 (int)result.ExtractedUrgency.Value >
@@ -101,6 +105,14 @@ public sealed class VerifyBloodRequestDocumentHandler
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        if (result.IsVerified)
+        {
+            await _notificationAgentQueue.EnqueueAsync(
+                bloodRequest.Id,
+                cancellationToken);
+        }
+
         return result;
     }
 }

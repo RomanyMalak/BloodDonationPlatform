@@ -12,18 +12,15 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrVerificationQueue _ocrQueue;
-    private readonly INotificationAgentQueue _notificationAgentQueue;
     private readonly IFileService _fileService;
 
     public CreateBloodRequestHandler(
         IApplicationDbContext dbContext,
         IOcrVerificationQueue ocrVerificationQueue,
-        INotificationAgentQueue notificationAgentQueue,
         IFileService fileService)
     {
         _dbContext = dbContext;
         _ocrQueue = ocrVerificationQueue;
-        _notificationAgentQueue = notificationAgentQueue;
         _fileService = fileService;
     }
 
@@ -65,8 +62,6 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
 
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        await _notificationAgentQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
-
         if(!hospitalCanApprove)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
