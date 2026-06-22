@@ -1,33 +1,30 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest
 {
-    public class CreateBloodRequestValidator
-     : AbstractValidator<CreateBloodRequestCommand>
+    public class CreateBloodRequestValidator : AbstractValidator<CreateBloodRequestCommand>
     {
         public CreateBloodRequestValidator()
         {
             RuleFor(x => x.PatientName)
-                .NotEmpty()
-                .MaximumLength(50);
+                .NotEmpty().WithMessage("Patient name is required.")
+                .MaximumLength(50).WithMessage("Patient name must not exceed 50 characters.");
 
             RuleFor(x => x.UnitsNeeded)
-                .GreaterThan(0);
+                .GreaterThan(0).WithMessage("Units needed must be greater than 0.");
 
             RuleFor(x => x.ContactPhone)
-                .MaximumLength(11);
+                .NotEmpty().WithMessage("Contact phone is required.")
+                .MaximumLength(11).WithMessage("Contact phone must not exceed 11 characters.");
 
             RuleFor(x => x.MedicalDocumentUrl)
-                .MaximumLength(500);
+                .NotEmpty().WithMessage("Medical document is required.")
+                .Must(file => file == null || file.Length <= 10 * 1024 * 1024)
+                .WithMessage("File size must not exceed 10 MB.");
 
             RuleFor(x => x.ExpiresAt)
-                .GreaterThan(DateTime.UtcNow)
-                .When(x => x.ExpiresAt.HasValue);
+                .NotEmpty().WithMessage("Expiry date is required.")
+                .GreaterThan(DateTime.UtcNow).WithMessage("Expiry date must be in the future.");
         }
     }
 }

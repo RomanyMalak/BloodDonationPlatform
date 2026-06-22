@@ -60,7 +60,7 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
             if (bloodRequest.Status != RequestStatus.PendingVerification)
                 throw new Exception("Request already processed");
 
-            bloodRequest.Status = RequestStatus.Matching;
+            bloodRequest.Status = RequestStatus.Approved;
             bloodRequest.ApprovedByHospitalId = request.HospitalId;
             bloodRequest.ApprovedAt = DateTime.UtcNow;
 

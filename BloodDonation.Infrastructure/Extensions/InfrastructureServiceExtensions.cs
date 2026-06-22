@@ -30,10 +30,12 @@ public static class InfrastructureServiceExtensions
 
         // Services
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>(); 
+        services.AddScoped<IFileService, FileService>();
         services.AddScoped<IDonorService, DonorService>();
         services.AddScoped<IDonorMatchingService, DonorMatchingService>();
         services.AddScoped<IAiMatchingPipelineService, NotificationAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IHospitalService, HospitalService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<INotificationSender, SignalRNotificationSender>();
         services.AddSingleton<IUserIdProvider, NotificationUserIdProvider>();
