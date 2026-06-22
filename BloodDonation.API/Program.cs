@@ -20,6 +20,8 @@ builder.Services.AddInfrastructure(builder.Configuration); //استدعاء ال
 
 builder.Services.AddControllers();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSignalR();
@@ -159,6 +161,8 @@ app.UseSwaggerUI();
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors("AngularClientPolicy");
 

@@ -4,7 +4,6 @@ using BloodDonation.Application.Features.Hospitals.Commands.RejectBloodRequest;
 using BloodDonation.Application.Features.Hospitals.Queries.GetPendingRequests;
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
-using BloodDonation.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,10 +21,14 @@ public class HospitalsController : ControllerBase
     private readonly IApplicationDbContext _dbContext;
     private readonly IHospitalService _hospitalService;
 
-    public HospitalsController(IMediator mediator, IApplicationDbContext dbContext)
+    public HospitalsController(
+        IMediator mediator,
+        IApplicationDbContext dbContext,
+        IHospitalService hospitalService)
     {
         _mediator = mediator;
         _dbContext = dbContext;
+        _hospitalService = hospitalService;
     }
 
     private async Task<Guid?> GetHospitalIdFromJwt(CancellationToken ct)

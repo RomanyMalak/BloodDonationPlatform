@@ -13,14 +13,18 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrVerificationQueue _ocrQueue;
     private readonly INotificationAgentQueue _notificationAgentQueue;
+    private readonly IFileService _fileService;
 
     public CreateBloodRequestHandler(
         IApplicationDbContext dbContext,
         IOcrVerificationQueue ocrVerificationQueue,
-        INotificationAgentQueue notificationAgentQueue)
+        INotificationAgentQueue notificationAgentQueue,
+        IFileService fileService)
     {
         _dbContext = dbContext;
         _ocrQueue = ocrVerificationQueue;
+        _notificationAgentQueue = notificationAgentQueue;
+        _fileService = fileService;
     }
 
     public async Task<CreateBloodRequestResponseDto> Handle(CreateBloodRequestCommand request, CancellationToken cancellationToken)
