@@ -156,7 +156,14 @@ public class OcrService : IOcrService
             }
             else
             {
-                fileBytes = await File.ReadAllBytesAsync(documentUrl);
+                var filePath = Path.IsPathRooted(documentUrl)
+                    ? documentUrl
+                    : Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot",
+                        documentUrl.TrimStart('/', '\\'));
+
+                fileBytes = await File.ReadAllBytesAsync(filePath);
             }
 
             using var engine = new TesseractEngine(

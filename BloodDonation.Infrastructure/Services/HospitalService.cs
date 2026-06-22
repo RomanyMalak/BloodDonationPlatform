@@ -2,6 +2,7 @@
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Infrastructure.Services;
@@ -9,31 +10,35 @@ namespace BloodDonation.Infrastructure.Services;
 public class HospitalService : IHospitalService
 {
     private readonly AppDbContext _context;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public HospitalService(AppDbContext context)
+    public HospitalService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     // جيب كل المستشفيات
     public async Task<List<HospitalDto>> GetAllAsync()
     {
-        return await _context.Hospitals
+        var hospitals = await _context.Hospitals
             .Include(h => h.BloodRequests)
             .OrderByDescending(h => h.CreatedAt)
-            .Select(h => MapToDto(h))
             .ToListAsync();
+
+        return hospitals.Select(MapToDto).ToList();
     }
 
     // جيب المستشفيات بناءً على الـ Status
     public async Task<List<HospitalDto>> GetByStatusAsync(HospitalStatus status)
     {
-        return await _context.Hospitals
+        var hospitals = await _context.Hospitals
             .Include(h => h.BloodRequests)
             .Where(h => h.Status == status)
             .OrderByDescending(h => h.CreatedAt)
-            .Select(h => MapToDto(h))
             .ToListAsync();
+
+        return hospitals.Select(MapToDto).ToList();
     }
 
     // جيب مستشفى واحد بالـ ID
@@ -82,7 +87,7 @@ public class HospitalService : IHospitalService
         return MapToDto(hospital);
     }
 
-    private static HospitalDto MapToDto(Hospital h) => new HospitalDto
+    private HospitalDto MapToDto(Hospital h) => new HospitalDto
     {
         Id = h.Id,
         Name = h.Name,
@@ -91,10 +96,28 @@ public class HospitalService : IHospitalService
         Latitude = h.Latitude,
         Longitude = h.Longitude,
         IsKnown = h.IsActive,
-        Status = (HospitalStatus)h.Status,
+        Status = h.Status ?? HospitalStatus.Waiting,
         CreatedAt = h.CreatedAt,
         ReviewedAt = h.ReviewedAt,
         RejectionReason = h.RejectionReason,
+        LicenseDocumentUrl = BuildLicenseDocumentUrl(h.LicenseDocumentPath),
         TotalBloodRequests = h.BloodRequests?.Count ?? 0
     };
+
+    private string? BuildLicenseDocumentUrl(string? licenseDocumentPath)
+    {
+        if (string.IsNullOrWhiteSpace(licenseDocumentPath))
+            return null;
+
+        if (Uri.TryCreate(licenseDocumentPath, UriKind.Absolute, out _))
+            return licenseDocumentPath;
+
+        var request = _httpContextAccessor.HttpContext?.Request;
+        var relativePath = licenseDocumentPath.TrimStart('/');
+
+        if (request is null)
+            return "/" + relativePath;
+
+        return $"{request.Scheme}://{request.Host}/{relativePath}";
+    }
 }

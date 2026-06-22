@@ -16,5 +16,6 @@ public class HospitalDto
     public DateTime CreatedAt { get; set; }
     public DateTime? ReviewedAt { get; set; }
     public string? RejectionReason { get; set; }
+    public string? LicenseDocumentUrl { get; set; }
     public int TotalBloodRequests { get; set; }
 }
