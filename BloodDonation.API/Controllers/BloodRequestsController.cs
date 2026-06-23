@@ -1,10 +1,11 @@
-using BloodDonation.Application.DTOs.BloodRequest;
+﻿using BloodDonation.Application.DTOs.BloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Commands.AcceptBloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Commands.CancelBloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Commands.CompleteDonation;
 using BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Queries.GetAvailableBloodRequests;
 using BloodDonation.Application.Features.BloodRequests.Queries.GetBloodRequestDetails;
+using BloodDonation.Application.Features.BloodRequests.Queries.GetMyBloodRequests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +65,21 @@ public class BloodRequestsController : ControllerBase
         return Ok(result);
     }
 
+    // GET api/blood-requests/my-requests
+    // كل طلبات الدم اللي عملها اليوزر الحالي، بغض النظر عن الـ Status
+    [HttpGet("my-requests")]
+    public async Task<IActionResult> GetMyRequests(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Unauthorized();
+
+        var result = await _mediator.Send(
+            new GetMyBloodRequestsQuery { UserId = Guid.Parse(userId) },
+            cancellationToken);
+
+        return Ok(result);
+    }
+
     // POST api/blood-requests/{id}/accept
     [HttpPost("{id:guid}/acceptBloodRequest")]
     public async Task<IActionResult> Accept(
@@ -73,7 +89,7 @@ public class BloodRequestsController : ControllerBase
         var donorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (donorId is null) return Unauthorized();
 
-        var result = await _mediator.Send(
+        await _mediator.Send(
             new AcceptBloodRequestCommand
             {
                 BloodRequestId = id,
@@ -81,9 +97,7 @@ public class BloodRequestsController : ControllerBase
             },
             cancellationToken);
 
-        return result
-            ? Ok("Request accepted successfully.")
-            : BadRequest("Unable to accept this request.");
+        return Ok("Request accepted successfully.");
     }
 
     // PUT api/blood-requests/{id}/cancel
