@@ -41,6 +41,7 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<IUserIdProvider, NotificationUserIdProvider>();
         services.AddSingleton<INotificationAgentQueue, NotificationAgentQueue>();
         services.AddHostedService<NotificationAgentBackgroundService>();
+        services.AddHostedService<BloodRequestAgentWorker>();
         services.AddScoped<IOcrService, OcrService>();
         services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();
         services.AddHostedService<OcrBackgroundService>();

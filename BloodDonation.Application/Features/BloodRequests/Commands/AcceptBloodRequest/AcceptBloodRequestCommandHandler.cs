@@ -35,7 +35,8 @@ public sealed class AcceptBloodRequestCommandHandler
         if (bloodRequest is null)
             return false;
 
-        if (bloodRequest.Status != RequestStatus.Matching)
+        if (bloodRequest.Status != RequestStatus.Approved &&
+            bloodRequest.Status != RequestStatus.Matching)
             return false;
 
         var donor = await _dbContext.Users
