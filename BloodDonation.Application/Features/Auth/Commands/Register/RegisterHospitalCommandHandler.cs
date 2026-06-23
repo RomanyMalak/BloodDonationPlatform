@@ -24,8 +24,8 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
         }
         public async Task<Guid> Handle(RegisterHospitalCommand request, CancellationToken cancellationToken)
         {
-            
-                var emailExists = _context.Users.Any(u => u.Email == request.Email);
+            var normalizedEmail = request.Email.ToLower().Trim();
+            var emailExists = _context.Users.Any(u => u.Email == normalizedEmail);
                 if (emailExists)
                 {
                     throw new Exception("Email already exists.");
@@ -37,7 +37,7 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Email = request.Email,
+                Email = normalizedEmail,
                 PasswordHash = hashedPassword,
                 Role = UserRole.Hospital,
              
