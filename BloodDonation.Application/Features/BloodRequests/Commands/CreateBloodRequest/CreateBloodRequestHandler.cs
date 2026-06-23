@@ -2,6 +2,7 @@
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
+using BloodDonation.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,16 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrVerificationQueue _ocrQueue;
-    public CreateBloodRequestHandler(IApplicationDbContext dbContext,IOcrVerificationQueue ocrVerificationQueue)
+    private readonly IFileService _fileService;
+
+    public CreateBloodRequestHandler(
+        IApplicationDbContext dbContext,
+        IOcrVerificationQueue ocrVerificationQueue,
+        IFileService fileService)
     {
         _dbContext = dbContext;
         _ocrQueue = ocrVerificationQueue;
+        _fileService = fileService;
     }
 
     public async Task<CreateBloodRequestResponseDto> Handle(CreateBloodRequestCommand request, CancellationToken cancellationToken)
@@ -30,6 +37,7 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
         }
 
         var user = await _dbContext.Users.FirstAsync(x => x.Id == request.CreatedByUserId, cancellationToken);
+        string savedDbPath = await _fileService.UploadFileAsync(request.MedicalDocumentUrl, "MedicalDocuments", cancellationToken);
 
         var bloodRequest = new BloodRequest
         {
@@ -37,13 +45,13 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
 
             PatientName = request.PatientName ?? user.FullName,
             PatientAge =request.PatientAge ?? user.Age,
-            RequiredBloodType = request.RequiredBloodType ?? user.BloodType!.Value,
+            RequiredBloodType = request.RequiredBloodType?? user.BloodType ?? throw new Exception("Blood type is required."),
             Status =RequestStatus.PendingVerification,
             HospitalId = request.HospitalId,
             CustomHospitalName = request.CustomHospitalName,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
-            MedicalDocumentUrl = request.MedicalDocumentUrl,
+            MedicalDocumentUrl = savedDbPath,
             Notes = request.Notes,
             ContactPhone = request.ContactPhone,
             UnitsNeeded = request.UnitsNeeded,
@@ -54,7 +62,6 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
 
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-
         if(!hospitalCanApprove)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);

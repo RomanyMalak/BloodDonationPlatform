@@ -64,7 +64,13 @@ public class DonorsController : ControllerBase
         var donors = await _donorService.GetEligibleDonorsAsync(bloodType);
         return Ok(donors);
     }
-
+    [AllowAnonymous]
+    [HttpGet("available")]
+    public async Task<IActionResult> GetAvailableDonors()
+    {
+        var donors = await _donorService.GetAvailableDonorsAsync();
+        return Ok(donors);
+    }
     private Guid? GetCurrentUserId()
     {
         var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

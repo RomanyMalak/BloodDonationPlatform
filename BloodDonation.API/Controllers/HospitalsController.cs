@@ -4,7 +4,6 @@ using BloodDonation.Application.Features.Hospitals.Commands.RejectBloodRequest;
 using BloodDonation.Application.Features.Hospitals.Queries.GetPendingRequests;
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
-using BloodDonation.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

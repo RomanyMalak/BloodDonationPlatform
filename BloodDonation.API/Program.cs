@@ -1,6 +1,7 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
 using BloodDonation.Infrastructure.Extensions;
+using BloodDonation.Infrastructure.Hubs;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,8 @@ builder.Services.AddInfrastructure(builder.Configuration); //استدعاء ال
 builder.Services.AddHttpClient();
 
 builder.Services.AddControllers();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -160,6 +163,8 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseCors("AngularClientPolicy");
 
 app.UseAuthentication();
@@ -167,6 +172,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())
 {

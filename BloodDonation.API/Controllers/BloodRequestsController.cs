@@ -27,7 +27,7 @@ public class BloodRequestsController : ControllerBase
     // POST api/blood-requests
     [HttpPost]
     public async Task<IActionResult> Create(
-        [FromBody] CreateBloodRequestCommand command,
+        [FromForm] CreateBloodRequestCommand command,
         CancellationToken cancellationToken)
     {
         var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -10,6 +10,7 @@ public interface IApplicationDbContext
     DbSet<BloodRequestAcceptance> BloodRequestAcceptances { get; }
     DbSet<Hospital> Hospitals { get; }
     DbSet<Notification> Notifications { get; }
+    DbSet<AiMatchingLog> AiMatchingLogs { get; }
     DbSet<DonationHistory> DonationHistories { get; }
     DbSet<OcrVerification>  OcrVerifications { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

@@ -18,12 +18,16 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
 
         private readonly IApplicationDbContext _dbContext;
         private readonly INotificationService _notificationService;
+        private readonly INotificationAgentQueue _notificationAgentQueue;
 
         public ApproveBloodRequestHandler(
-            IApplicationDbContext dbContext, INotificationService notificationService)
+            IApplicationDbContext dbContext,
+            INotificationService notificationService,
+            INotificationAgentQueue notificationAgentQueue)
         {
             _dbContext = dbContext;
             _notificationService = notificationService;
+            _notificationAgentQueue = notificationAgentQueue;
         }
 
         public async Task<BloodRequestDetailsDto?> Handle(
@@ -73,6 +77,10 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
                    bloodRequest.Id,
                    "BloodRequest",
                    cancellationToken);
+
+            await _notificationAgentQueue.EnqueueAsync(
+                bloodRequest.Id,
+                cancellationToken);
 
             return new BloodRequestDetailsDto
             {
