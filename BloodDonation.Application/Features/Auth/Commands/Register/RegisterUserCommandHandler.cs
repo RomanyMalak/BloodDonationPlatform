@@ -22,8 +22,8 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
         }
         public async Task<RegisterResponseDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-
-            var existingemail = await _context.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
+            var normalizedEmail = request.Email.ToLower().Trim();
+            var existingemail = await _context.Users.AnyAsync(u => u.Email == normalizedEmail, cancellationToken);
             if (existingemail)
             {
                 throw new Exception("Email already exists");
@@ -37,7 +37,7 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
 
                 Id = Guid.NewGuid(),
                 FullName = request.FullName,
-                Email = request.Email,
+                Email = normalizedEmail,
                 PasswordHash = hashedPassword,
                 Phone = request.Phone,
                 Age = request.Age,

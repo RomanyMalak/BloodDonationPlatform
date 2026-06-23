@@ -74,7 +74,7 @@ public class HospitalsController : ControllerBase
     /// جيب المستشفيات الفعّالة
     /// </summary>
     [HttpGet("active")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetActive()
     {
         var result = await _hospitalService.GetByStatusAsync(HospitalStatus.Active);

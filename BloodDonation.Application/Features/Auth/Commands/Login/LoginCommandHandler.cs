@@ -23,9 +23,11 @@ namespace BloodDonation.Application.Features.Auth.Commands.Login
   //"password": "ITI2026BloodDonationAdmin",
         public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
+            var normalizedEmail = request.Email.ToLower().Trim();
+
             var user = await _context.Users
                  .Include(u => u.Hospital)
-                 .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                 .FirstOrDefaultAsync(x => x.Email == normalizedEmail, cancellationToken);
 
             if (user == null)
             {
