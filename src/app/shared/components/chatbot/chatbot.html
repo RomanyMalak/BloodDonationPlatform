@@ -1,0 +1,110 @@
+<!-- Floating Button -->
+<div class="chatbot-trigger" (mouseenter)="showTooltip = true" (mouseleave)="showTooltip = false">
+  <div class="chatbot-tooltip" [class.visible]="showTooltip && !isOpen">
+    تحدث مع مساعدنا الطبي
+  </div>
+  <button class="chatbot-btn" (click)="toggleChat()" aria-label="مساعد BloodHub">
+    <svg *ngIf="!isOpen" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    <svg *ngIf="isOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
+
+<!-- Chat Window -->
+<div class="chatbot-window" [class.open]="isOpen">
+
+  <!-- Header -->
+  <div class="chatbot-header">
+    <button class="chatbot-close" (click)="toggleChat()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <div class="chatbot-header__info">
+      <div class="chatbot-header__name">مساعد BloodHub</div>
+      <div class="chatbot-header__status">
+        <span class="status-dot"></span>
+        متاح الآن
+      </div>
+    </div>
+    <div class="chatbot-header__avatar">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="chatbot-messages" #messagesContainer>
+
+    <!-- Bot welcome message -->
+    <div class="chat-msg chat-msg--bot">
+      <div class="chat-msg__avatar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <div class="chat-msg__bubble">
+        مرحباً! أنا مساعدك الطبي. كيف يمكنني مساعدتك اليوم؟
+      </div>
+    </div>
+
+    <!-- Dynamic messages -->
+    <ng-container *ngFor="let msg of messages">
+      <div class="chat-msg" [class.chat-msg--bot]="msg.from === 'bot'" [class.chat-msg--user]="msg.from === 'user'">
+        <div class="chat-msg__avatar" *ngIf="msg.from === 'bot'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </div>
+        <div class="chat-msg__bubble">{{ msg.text }}</div>
+      </div>
+    </ng-container>
+
+    <!-- Typing indicator -->
+    <div class="chat-msg chat-msg--bot" *ngIf="isTyping">
+      <div class="chat-msg__avatar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <div class="chat-msg__bubble chat-msg__bubble--typing">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Quick Replies -->
+  <div class="chatbot-quick" *ngIf="messages.length === 0">
+    <button class="quick-btn" (click)="sendQuick('أريد التبرع بالدم')">
+      🩸 أريد التبرع بالدم
+    </button>
+    <button class="quick-btn" (click)="sendQuick('أحتاج دماً بشكل عاجل')">
+      🚨 أحتاج دماً بشكل عاجل
+    </button>
+    <button class="quick-btn" (click)="sendQuick('البحث عن بنك دم')">
+      🏥 البحث عن بنك دم
+    </button>
+    <button class="quick-btn" (click)="sendQuick('التواصل مع الدعم')">
+      💬 التواصل مع الدعم
+    </button>
+  </div>
+
+  <!-- Input -->
+  <div class="chatbot-input">
+    <input type="text" class="chatbot-input__field"
+      placeholder="اكتب رسالتك..."
+      [(ngModel)]="userMessage"
+      (keyup.enter)="sendMessage()"/>
+    <button class="chatbot-input__send" (click)="sendMessage()" [disabled]="!userMessage.trim()">
+      إرسال
+    </button>
+  </div>
+
+</div>

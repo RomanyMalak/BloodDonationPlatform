@@ -1,0 +1,179 @@
+
+<main class="requests-page">
+  <div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+
+      <div class="col-lg-4 d-flex flex-column gap-4">
+
+        <!-- Urgent -->
+        <div class="card urgent-card">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <span class="urgent-dot"></span>
+              <h4 class="mb-0">طلبات عاجلة جداً</h4>
+            </div>
+            <span class="badge badge-danger">عاجل</span>
+          </div>
+
+          <div class="d-flex flex-column gap-3">
+
+            <div class="urgent-item">
+              <div class="d-flex align-items-center gap-3">
+                <div class="urgent-item__blood">+O</div>
+                <div class="flex-1">
+                  <div class="urgent-item__hospital">مستشفى المنيا العام</div>
+                  <div class="urgent-item__desc">يحتاج متبرعين فوراً لحالة طارئة</div>
+                  <div class="urgent-item__time">منذ دقيقتين</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="urgent-item">
+              <div class="d-flex align-items-center gap-3">
+                <div class="urgent-item__blood">-A</div>
+                <div class="flex-1">
+                  <div class="urgent-item__hospital">مستشفى مغاغة المركزي</div>
+                  <div class="urgent-item__desc">نقص حاد في المخزون الصحية</div>
+                  <div class="urgent-item__time">منذ 10 دقائق</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- How to Donate -->
+        <div class="card how-card">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="how-card__icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <h4 class="mb-0">كيف تتبرع؟</h4>
+          </div>
+          <p class="text-secondary mb-3" style="font-size:0.875rem; line-height:1.8;">
+            عملية التبرع بسيطة وتأخذ حوالي 10 دقائق. أحد المتبرعين أقرب إليك، اختر الطلب المناسب وتوجه للمستشفى المذكور.
+          </p>
+          <a routerLink="/how-to-donate" class="how-card__link">
+            شروط التبرع ←
+          </a>
+        </div>
+
+      </div>
+      <!-- ===== MAIN CONTENT ===== -->
+      <div class="col-lg-8">
+
+        <!-- Filters -->
+        <div class="card filters-card mb-4">
+          <div class="row g-3 align-items-center">
+
+            <div class="col-md-4">
+              <label class="form-label">فصيلة الدم</label>
+              <select class="form-select" [(ngModel)]="selectedBloodType" (change)="filterRequests()">
+                <option value="">الكل</option>
+                <option value="+A">A+</option>
+                <option value="-A">A-</option>
+                <option value="+B">B+</option>
+                <option value="-B">B-</option>
+                <option value="+AB">AB+</option>
+                <option value="-AB">AB-</option>
+                <option value="+O">O+</option>
+                <option value="-O">O-</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">ابحث عن طلبات محددة</label>
+              <div class="search-input">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="form-control"
+                  placeholder="ابحث باسم المستشفى أو المدينة..."
+                  [(ngModel)]="searchQuery"
+                  (input)="filterRequests()"/>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+
+        <!-- Results count -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h4 class="mb-0">جميع الطلبات النشطة</h4>
+          <span class="results-count">تم العثور على {{ filteredRequests.length }} طلب تبرع</span>
+        </div>
+
+        <!-- Table -->
+        <div class="card p-0 overflow-hidden">
+          <div class="table-responsive">
+            <table class="req-table w-100">
+              <thead>
+                <tr>
+                  <th>المستشفى والمدينة</th>
+                  <th>الفصيلة</th>
+                  <th>الحالة</th>
+                  <th>الاحتياج</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let req of filteredRequests">
+                  <td>
+                    <div class="hospital-info">
+                      <div class="hospital-info__name">{{ req.hospital }}</div>
+                      <div class="hospital-info__location">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        {{ req.city }} · {{ req.distance }}
+                      </div>
+                      <div class="hospital-info__time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="10"/>
+                          <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        منذ {{ req.time }}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="blood-badge">{{ req.bloodType }}</span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(req.status)">{{ req.status }}</span>
+                  </td>
+                  <td>
+                    <div class="need-info">
+                      <div class="need-info__label">من {{ req.needed }}</div>
+                      <div class="need-bar">
+                        <div class="need-bar__fill" [style.width]="req.progress + '%'"></div>
+                      </div>
+                      <div class="need-info__sub">{{ req.timeLeft }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="btn btn-primary btn-sm">تبرع الآن</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+      </div>
+
+      
+
+    </div>
+  </div>
+</main>
+

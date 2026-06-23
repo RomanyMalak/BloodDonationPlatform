@@ -1,0 +1,201 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="page-content">
+
+    <!-- ===== WELCOME ===== -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h2 class="mb-1">مرحباً، {{ fullName }}</h2>
+        <p class="text-secondary mb-0">تابع نشاطك الطبي وساهم في إنقاذ الأرواح اليوم.</p>
+      </div>
+      <div class="availability-wrap" (click)="toggleAvailability()">
+        <span class="availability-wrap__label">أنا متاح للتبرع</span>
+        <div class="toggle" [class.toggle--on]="isAvailable">
+          <div class="toggle__thumb"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="row g-3 mb-5">
+      <div class="col-4">
+        <div class="card stat-card">
+          <div class="stat-card__icon stat-card__icon--teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <div class="stat-card__val">{{ donationHistory.length }}</div>
+          <div class="stat-card__label">عملية تبرع ناجحة</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card stat-card">
+          <div class="stat-card__icon stat-card__icon--red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            </svg>
+          </div>
+          <div class="stat-card__val">{{ availableRequests.length }}</div>
+          <div class="stat-card__label">طلبات نشطة حالياً</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card stat-card">
+          <div class="stat-card__icon stat-card__icon--pink">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <div class="stat-card__val">{{ donationHistory.length * 3 }}</div>
+          <div class="stat-card__label">حياة تم إنقاذها</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MY REQUESTS ===== -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h4 class="mb-0">طلباتي الحالية</h4>
+      <span class="ai-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        مدعوم بـ AI Pipeline
+      </span>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-8" *ngIf="myRequests.length > 0">
+        <div class="card my-request-card" *ngFor="let r of myRequests">
+          <!-- Header with blood type -->
+          <div class="my-request-card__header">
+            <div class="my-request-card__status-section">
+              <span class="my-request-card__status" [class]="'status-' + (r.status | lowercase)">{{ r.status }}</span>
+            </div>
+            <div class="my-request-card__blood-badge">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+              </svg>
+              <span class="my-request-card__blood-type">{{ r.requiredBloodType }}</span>
+            </div>
+          </div>
+
+          <!-- Main content -->
+          <div class="my-request-card__content">
+            <h3 class="my-request-card__hospital">{{ r.hospitalName || 'غير محدد' }}</h3>
+            <p class="my-request-card__patient">للمريض: {{ r.patientName }}</p>
+            
+            <!-- Info grid -->
+           <div class="my-request-card__info-grid">
+              <div class="my-request-card__info-item">
+                <span class="my-request-card__info-label">الوحدات المطلوبة</span>
+                <span class="my-request-card__info-value">{{ r.unitsNeeded }} وحدات</span>
+              </div>
+              <div class="my-request-card__info-item">
+                <span class="my-request-card__info-label">النوع المطلوب</span>
+                <span class="my-request-card__blood-value">{{ r.requiredBloodType }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="my-request-card__actions">
+            <a [routerLink]="['/request-detail']" [queryParams]="{ id: r.id }" class="btn btn-primary btn-sm">عرض التفاصيل</a>
+            <button class="btn btn-outline btn-sm" (click)="cancelRequest(r.id)">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <a routerLink="/request-form" class="new-request-card">
+          <div class="new-request-card__icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </div>
+          <div class="new-request-card__title">إنشاء طلب جديد</div>
+        </a>
+      </div>
+
+      <div class="col-12" *ngIf="myRequests.length === 0">
+        <div class="card my-request-card my-request-card--empty d-flex align-items-center justify-content-center">
+          <div class="text-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-3" style="color: var(--text-muted);">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+              <path d="M12 8v8"/>
+            </svg>
+            <p class="text-secondary mb-0">لا توجد طلبات نشطة حالياً.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NEARBY URGENT ===== -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h4 class="mb-0">طلبات عاجلة قريبة منك</h4>
+      <a routerLink="/donation-requests" class="btn btn-ghost btn-sm">عرض الكل ←</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4" *ngFor="let r of nearbyRequests">
+        <div class="card nearby-card" [class.nearby-card--urgent]="r.urgency === 'Critical'">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="badge"
+              [class.badge-danger]="r.urgency === 'Critical'"
+              [class.badge-warning]="r.urgency === 'Urgent'"
+              [class.badge-success]="r.urgency === 'Normal'">
+              {{ r.urgency === 'Critical' ? 'حالة حرجة' : r.urgency === 'Urgent' ? 'عاجل' : 'مستقر' }}
+            </span>
+            <span class="blood-badge">{{ r.requiredBloodType }}</span>
+          </div>
+          <h4 class="nearby-card__hospital">{{ r.hospitalName }}</h4>
+          <div class="nearby-card__distance">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            على بعد {{ r.distanceKm | number:'1.1-1' }} كم
+          </div>
+          <button class="btn btn-primary w-100 mt-3" (click)="acceptRequest(r.id)">
+            قبول الطلب
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12" *ngIf="nearbyRequests.length === 0 && !isLoading">
+        <p class="text-secondary text-center">لا توجد طلبات قريبة منك حالياً.</p>
+      </div>
+    </div>
+
+    <!-- ===== RECENT ACTIVITY ===== -->
+    <h4 class="mb-3">النشاط الأخير</h4>
+    <div class="card p-0 overflow-hidden">
+
+      <div class="activity-item" *ngFor="let h of donationHistory">
+        <div class="activity-item__icon activity-item__icon--green">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="activity-item__content">
+          <div class="activity-item__title">{{ h.notes || 'تبرع ناجح' }}</div>
+          <div class="activity-item__meta">{{ h.completedAt | date:'dd/MM/yyyy' }} · تبرع ناجح</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-item__arrow">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </div>
+
+      <div class="activity-item" *ngIf="donationHistory.length === 0">
+        <div class="activity-item__content">
+          <div class="activity-item__title text-secondary">لا يوجد نشاط سابق.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>

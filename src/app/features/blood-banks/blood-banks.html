@@ -1,0 +1,149 @@
+
+<main class="blood-banks-page">
+
+  <!-- ===== HERO ===== -->
+  <section class="bb-hero">
+    <div class="container">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="bb-hero__tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          مراكز معتمدة من وزارة الصحة
+        </span>
+      </div>
+      <h1 class="bb-hero__title">بنوك الدم في مصر</h1>
+      <p class="bb-hero__desc">
+        تساهم قطرة دم واحدة في إنقاذ حياة. ابحث عن أقرب مركز تبرع معتمد إليك وتوجه لزيارته اليوم. نحن نستخدم تقنيات الذكاء الاصطناعي للتوجيه لأكثر المراكز احتياجاً لفصيلة دمك.
+      </p>
+
+      <!-- Search + Filter -->
+      <div class="bb-filters d-flex align-items-center justify-content-between flex-wrap gap-3">
+       
+        <div class="bb-filters__cities">
+          <button class="city-btn" [class.active]="selectedCity === ''"
+            (click)="selectCity('')">الكل</button>
+          <button class="city-btn" [class.active]="selectedCity === 'القاهرة'"
+            (click)="selectCity('القاهرة')">القاهرة</button>
+          <button class="city-btn" [class.active]="selectedCity === 'الإسكندرية'"
+            (click)="selectCity('الإسكندرية')">الإسكندرية</button>
+          <button class="city-btn" [class.active]="selectedCity === 'الدلتا'"
+            (click)="selectCity('الدلتا')">الدلتا</button>
+          <button class="city-btn" [class.active]="selectedCity === 'الصعيد'"
+            (click)="selectCity('الصعيد')">الصعيد</button>
+        </div>
+         <div class="bb-filters__search w-50">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" placeholder="ابحث عن اسم المركز أو المدينة..."
+            [(ngModel)]="searchQuery" (input)="filterBanks()"/>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BANKS GRID ===== -->
+  <section class="bb-grid">
+    <div class="container">
+      <div class="row g-3">
+        <div class="col-md-4" *ngFor="let bank of filteredBanks">
+          <div class="bank-card">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+              <span class="bank-card__type" [class.bank-card__type--red]="bank.type === 'هلال أحمر'"
+                [class.bank-card__type--blue]="bank.type === 'قومي'"
+                [class.bank-card__type--gray]="bank.type === 'إقليمي'"
+                [class.bank-card__type--green]="bank.type === 'عام'">
+                {{ bank.type }}
+              </span>
+              <div class="bank-card__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </div>
+            </div>
+
+            <h4 class="bank-card__name">{{ bank.name }}</h4>
+<div class="bank-card__location">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+    </svg>
+    {{ bank.city }}
+</div>
+<a [href]="'tel:' + bank.phone" class="bank-card__phone">
+     {{ bank.phone }}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path
+            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+   
+</a>
+<a [href]="bank.mapUrl" target="_blank" class="bank-card__map-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+        <line x1="8" y1="2" x2="8" y2="18" />
+        <line x1="16" y1="6" x2="16" y2="22" />
+    </svg>
+    الموقع على الخريطة
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== COVERAGE SECTION ===== -->
+<section class="bb-coverage">
+    <div class="container">
+        <div class="row align-items-center g-4">
+
+            <div class="col-lg-5">
+                <div class="bb-coverage__img-wrap">
+                    <img src="assets/images/blood-bank.png" alt="تغطية شاملة"/>
+            <div class="bb-coverage__ai-tag">
+              <div class="bb-coverage__ai-dot"></div>
+              <div>
+                <div class="bb-coverage__ai-title">النظام الذكي نشط</div>
+                <div class="bb-coverage__ai-sub">يحلل المخزون المتاح</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <h2 class="mb-3">تغطية شاملة لجميع المحافظات</h2>
+          <p class="text-secondary mb-4" style="line-height:1.9;">
+            نعمل على ربط شبكة واسعة من بنوك الدم لضمان توفر الفصائل النادرة في حالات الطوارئ. تطبيق نبض الأمل يتيح لك تتبع مسار تبرعك عن نظام AI المتقدم.
+          </p>
+
+          <div class="row g-3">
+            <div class="col-4">
+              <div class="coverage-stat">
+                <div class="coverage-stat__val">AI</div>
+                <div class="coverage-stat__label">إدارة ذكية</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="coverage-stat">
+                <div class="coverage-stat__val">24/7</div>
+                <div class="coverage-stat__label">ساعات عمل</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="coverage-stat">
+                <div class="coverage-stat__val">+19</div>
+                <div class="coverage-stat__label">مركز رئيسي</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+

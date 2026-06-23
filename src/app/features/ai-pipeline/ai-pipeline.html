@@ -1,0 +1,239 @@
+
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="page-content">
+
+    <!-- ===== HEADER ===== -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h2 class="mb-1">معالجة طلب التبرع الذكية</h2>
+        <span class="badge badge-warning">
+          <span class="processing-dot"></span>
+          قيد المعالجة (AI Pipeline)
+        </span>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-ghost btn-sm">عرض تقرير التحليل المبدئي</button>
+        <button class="btn btn-outline btn-sm">إلغاء الطلب</button>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- ===== LEFT: Pipeline Steps ===== -->
+      <div class="col-lg-8">
+        <div class="card pipeline-card">
+
+          <!-- Request created -->
+          <div class="pipeline-item pipeline-item--done">
+            <div class="pipeline-item__indicator">
+              <div class="pipeline-item__dot pipeline-item__dot--done">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="pipeline-item__line pipeline-item__line--done"></div>
+            </div>
+            <div class="pipeline-item__content">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <h4 class="mb-0">تم إنشاء طلب الدم</h4>
+                <span class="badge badge-success">مكتمل</span>
+              </div>
+              <p class="text-secondary mb-0">
+                تم استلام بيانات الحالة رقم #REQ-8821 بنجاح.
+              </p>
+            </div>
+          </div>
+
+          <!-- Triage Agent -->
+          <div class="pipeline-item pipeline-item--active">
+            <div class="pipeline-item__indicator">
+              <div class="pipeline-item__dot pipeline-item__dot--active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <div class="pipeline-item__line"></div>
+            </div>
+            <div class="pipeline-item__content pipeline-item__content--active">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <h4 class="mb-0">Triage Agent - تحديد أولوية الحالة</h4>
+                  <button class="more-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <p class="text-secondary mb-3">
+                يتم تحليل التقارير الطبية لتصنيف الاستعجال (Critical / Standard).
+              </p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" style="width: 75%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical Validator -->
+          <div class="pipeline-item pipeline-item--waiting">
+            <div class="pipeline-item__indicator">
+              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+              </div>
+              <div class="pipeline-item__line"></div>
+            </div>
+            <div class="pipeline-item__content">
+              <h4 class="mb-1">Medical Validator Agent - فلترة المتبرعين</h4>
+              <p class="text-secondary mb-0">
+                التحقق من توافق فصائل الدم والسجلات الطبية للمتبرعين المتاحين.
+              </p>
+            </div>
+          </div>
+
+          <!-- Geo Matching -->
+          <div class="pipeline-item pipeline-item--waiting">
+            <div class="pipeline-item__indicator">
+              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+              <div class="pipeline-item__line"></div>
+            </div>
+            <div class="pipeline-item__content">
+              <h4 class="mb-1">Geo-Matching Agent - ترتيب حسب المسافة</h4>
+              <p class="text-secondary mb-0">
+                تحديد أقرب المتبرعين جغرافياً من موقع المستشفى الحالي.
+              </p>
+            </div>
+          </div>
+
+          <!-- Notification Agent -->
+          <div class="pipeline-item pipeline-item--waiting">
+            <div class="pipeline-item__indicator">
+              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </div>
+              <div class="pipeline-item__line"></div>
+            </div>
+            <div class="pipeline-item__content">
+              <h4 class="mb-1">Notification Agent - إرسال الإشعارات</h4>
+              <p class="text-secondary mb-0">
+                توزيع التنبيهات المخصصة عبر التطبيق والرسائل القصيرة.
+              </p>
+            </div>
+          </div>
+
+          <!-- Done -->
+          <div class="pipeline-item">
+            <div class="pipeline-item__indicator">
+              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+            </div>
+            <div class="pipeline-item__content">
+              <h4 class="mb-1">تفعيل الطلب بنجاح</h4>
+              <p class="text-secondary mb-0">
+                المرحلة النهائية لنشر الطلب في الشبكة العامة.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== RIGHT: AI Sidebar ===== -->
+      <div class="col-lg-4 d-flex flex-column gap-4">
+
+        <!-- AI Insights -->
+        <div class="card ai-side-card">
+          <div class="d-flex align-items-center gap-2 mb-4">
+            <div class="ai-side-card__icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <div>
+              <div class="ai-side-card__title">رؤى الذكاء الاصطناعي</div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column gap-3">
+
+            <div class="ai-insight-item">
+              <div class="ai-insight-item__label">المتبرعون المحتملون</div>
+              <div class="ai-insight-item__val">142</div>
+              <div class="ai-insight-item__sub">+12 من المنطقة القريبة</div>
+            </div>
+
+            <div class="ai-insight-item">
+              <div class="ai-insight-item__label">وقت الاستجابة المتوقع</div>
+              <div class="ai-insight-item__val">14 <span>دقيقة</span></div>
+              <div class="ai-insight-item__sub">بناءً على نشاط المتبرعين الحالي</div>
+            </div>
+
+            <div class="ai-insight-item ai-insight-item--urgent">
+              <div class="ai-insight-item__label">مستوى الاستعجال</div>
+              <div class="ai-insight-item__val ai-insight-item__val--red">عاجل جداً</div>
+              <div class="progress-bar-wrap mt-2">
+                <div class="progress-bar-fill progress-bar-fill--red" style="width: 90%"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Request Details -->
+        <div class="card">
+          <h4 class="mb-3">تفاصيل الطلب</h4>
+
+          <div class="d-flex flex-column gap-3">
+
+            <div class="detail-row">
+              <span class="detail-row__label">فصيلة الدم</span>
+              <span class="blood-badge" style="width:36px;height:36px;font-size:0.75rem;">-0</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">عدد الوحدات</span>
+              <span class="detail-row__val">4 وحدات</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">المستشفى</span>
+              <span class="detail-row__val">مجمع الشفاء الطبي</span>
+            </div>
+
+          </div>
+
+          <!-- Hospital Image -->
+          <div class="hospital-img-wrap mt-3">
+            <img src="assets/images/hospital.png" alt="المستشفى"/>
+          </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-column gap-2">
+          <button class="btn btn-primary btn-lg">عرض تقرير التحليل المبدئي</button>
+          <button class="btn btn-ghost btn-lg">إلغاء الطلب</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>

@@ -1,0 +1,321 @@
+
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="page-content">
+
+    <!-- ===== BREADCRUMB + ACTIONS ===== -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div class="d-flex align-items-center gap-2 breadcrumb-nav">
+        <a routerLink="/dashboard">الرئيسية</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        <a routerLink="/my-requests">طلباتي</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        <span>طلب رقم #{{ request.id || (request.requestId || '—') }}</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <a routerLink="/dashboard" class="btn btn-ghost btn-sm">العودة إلى لوحة التحكم</a>
+        <button class="btn btn-outline btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          تحديث حالة الطلب
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== MAIN GRID ===== -->
+    <div class="row g-4">
+
+      <!-- ===== RIGHT: AI Results ===== -->
+      <div class="col-lg-4">
+        <div class="card ai-results h-100">
+
+          <div class="d-flex align-items-center gap-2 mb-4">
+            <div class="ai-results__icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h4 class="mb-0">نتائج الذكاء الاصطناعي</h4>
+          </div>
+
+          <div class="d-flex flex-column gap-3 mb-4">
+
+            <div class="ai-stat-card">
+              <div class="ai-stat-card__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ai-stat-card__label">المتبرعون المطابقون</div>
+                <div class="ai-stat-card__val">12 متبرع</div>
+              </div>
+            </div>
+
+            <div class="ai-stat-card">
+              <div class="ai-stat-card__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ai-stat-card__label">تنبيهات تم إرسالها</div>
+                <div class="ai-stat-card__val">48 تنبيه</div>
+              </div>
+            </div>
+
+            <div class="ai-stat-card">
+              <div class="ai-stat-card__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ai-stat-card__label">أقرب مسافة متبرع</div>
+                <div class="ai-stat-card__val">850 متر</div>
+              </div>
+            </div>
+
+            <div class="ai-stat-card">
+              <div class="ai-stat-card__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <line x1="9" y1="21" x2="9" y2="9"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ai-stat-card__label">متوسط المسافة</div>
+                <div class="ai-stat-card__val">3.2 كم</div>
+              </div>
+            </div>
+
+            <div class="ai-stat-card ai-stat-card--green">
+              <div class="ai-stat-card__icon ai-stat-card__icon--green">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ai-stat-card__label">استجابات مؤكدة</div>
+                <div class="ai-stat-card__val ai-stat-card__val--green">3 متبرعين</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== LEFT: Request Summary + Map ===== -->
+      <div class="col-lg-8 d-flex flex-column gap-4">
+
+        <!-- Request Summary -->
+        <div class="card">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">ملخص الطلب</h4>
+            <span class="badge badge-danger">{{ request.status || (request.state || 'عاجل') }}</span>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-md-8">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="detail-field">
+                    <div class="detail-field__icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="12" y1="8" x2="12" y2="16"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="detail-field__label">المستشفى</div>
+                      <div class="detail-field__val">{{ request.customHospitalName || request.hospitalName || '—' }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="detail-field">
+                    <div class="detail-field__icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="3"/>
+                        <path d="M5 20c1-4 6-6 7-6s6 2 7 6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="detail-field__label">اسم المريض</div>
+                      <div class="detail-field__val">{{ request.patientName || '—' }} <span *ngIf="request.patientAge">• {{ request.patientAge }} سنة</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="detail-field">
+                    <div class="detail-field__icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="detail-field__label">الموقع</div>
+                      <div class="detail-field__val">{{ request.location || (request.address || '—') }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="detail-field">
+                    <div class="detail-field__icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="detail-field__label">رقم التواصل</div>
+                      <div class="detail-field__val">{{ request.contactPhone || request.phone || '—' }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="detail-field">
+                    <div class="detail-field__icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="detail-field__label">وقت الإنشاء</div>
+                      <div class="detail-field__val">{{ request.createdAt || request.createdOn || '—' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Blood Type -->
+            <div class="col-md-4 d-flex align-items-center justify-content-center">
+              <div class="blood-type-box">
+                <div class="blood-type-box__label">فصيلة الدم المطلوبة</div>
+                <div class="blood-type-box__badge">{{ getBloodTypeSymbol(request.requiredBloodType || request.bloodType) || '-' }}</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Map -->
+          <div class="map-wrap mt-4">
+            <div class="map-placeholder">
+              <div class="map-pin">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--primary)">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3" fill="white"/>
+                </svg>
+              </div>
+              <div class="map-distance-tag">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                </svg>
+                يقع على بعد 2.4 كم من موقعك الحالي
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pipeline -->
+        <div class="card">
+          <div class="d-flex align-items-center gap-2 mb-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <h4 class="mb-0">مسار معالجة الطلب</h4>
+          </div>
+
+          <div class="pipeline">
+            <div class="pipeline__step pipeline__step--done">
+              <div class="pipeline__dot pipeline__dot--done">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="pipeline__line pipeline__line--done"></div>
+              <div class="pipeline__label">تم الإنشاء</div>
+              <div class="pipeline__time">12:45 م</div>
+            </div>
+            <div class="pipeline__step pipeline__step--done">
+              <div class="pipeline__dot pipeline__dot--done">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="pipeline__line pipeline__line--done"></div>
+              <div class="pipeline__label">تحليل الأولوية</div>
+              <div class="pipeline__time">12:46 م</div>
+            </div>
+            <div class="pipeline__step pipeline__step--done">
+              <div class="pipeline__dot pipeline__dot--done">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="pipeline__line pipeline__line--done"></div>
+              <div class="pipeline__label">تصفية المتبرعين</div>
+              <div class="pipeline__time">12:47 م</div>
+            </div>
+            <div class="pipeline__step pipeline__step--done">
+              <div class="pipeline__dot pipeline__dot--done">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="pipeline__line pipeline__line--active"></div>
+              <div class="pipeline__label">إرسال التنبيهات</div>
+              <div class="pipeline__time">12:48 م</div>
+            </div>
+            <div class="pipeline__step pipeline__step--pending">
+              <div class="pipeline__dot pipeline__dot--pending">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                </svg>
+              </div>
+              <div class="pipeline__line"></div>
+              <div class="pipeline__label">في انتظار القبول</div>
+              <div class="pipeline__time">جاري التحديث...</div>
+            </div>
+          </div>
+
+          <!-- AI Insight -->
+          <div class="ai-insight mt-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+              </svg>
+              <span class="ai-insight__title">رؤية المحرك الذكي</span>
+            </div>
+            <p class="mb-0">
+              بناءً على النماذج التنبؤية، من المتوقع اكتمال الطلب خلال 14 دقيقة إضافية. تم توسيع دائرة البحث لتشمل 5 كم لضمان الاستجابة السريعة.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>

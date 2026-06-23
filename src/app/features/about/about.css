@@ -1,0 +1,291 @@
+.about-page {
+  background: var(--bg-main);
+}
+
+/* ================= HERO ================= */
+
+.hero-section {
+  padding: 80px 0 50px;
+}
+
+.about-badge {
+  background: #f7e6e8;
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.hero-title span {
+  color: var(--primary);
+}
+
+.hero-desc {
+  max-width: 750px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+/* ================= STATS ================= */
+
+.stats-section {
+  margin-bottom: 80px;
+}
+
+.stats-card {
+  padding: 35px;
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.stat-item:not(:last-child) {
+  border-left: 1px solid var(--border);
+}
+
+.stat-item h2 {
+  color: var(--primary);
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.stat-item p {
+  color: var(--text-secondary);
+  font-size: .9rem;
+}
+
+/* ================= INFO CARDS ================= */
+
+.vision-section {
+  margin-bottom: 80px;
+}
+
+.info-card {
+  height: 100%;
+  text-align: center;
+  padding: 40px 30px;
+  border-radius: 20px;
+  transition: .3s;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+}
+
+.vision-card {
+  border-top: 4px solid var(--primary);
+}
+
+.mission-card {
+  border-top: 4px solid teal;
+}
+
+.icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: #fdecec;
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto auto 20px;
+  font-size: 22px;
+}
+
+.icon-wrapper.secondary {
+  background: #edf3f7;
+  color: #4b5563;
+}
+
+.info-card h2 {
+  margin-bottom: 15px;
+  font-size: 2rem;
+}
+
+.title-line {
+  width: 90px;
+  height: 3px;
+  background: rgba(6, 129, 129, 0.29);
+  margin: 0 auto 25px;
+  border-radius: 10px;
+}
+.title-line.red{
+    background: rgba(129, 20, 6, 0.29);
+
+}
+
+.info-card p {
+  color: var(--text-secondary);
+  line-height: 2;
+}
+
+/* ================= PROCESS ================= */
+
+.process-section {
+  background: #f2f4f7;
+  padding: 90px 0;
+}
+
+.timeline {
+  max-width: 900px;
+  margin: auto;
+  position: relative;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  right: 24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ddd;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 50px;
+  position: relative;
+}
+
+.timeline-number {
+  min-width: 50px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: white;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.timeline-number.active {
+  background: var(--primary);
+  color: white;
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-content h4 {
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.timeline-content p {
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+
+/* ================= CTA ================= */
+
+.cta-section {
+  padding: 80px 0;
+}
+
+.cta-card {
+  background: linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-dark)
+  );
+  color: white;
+  padding: 70px 30px;
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-card::before {
+  content: "";
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: rgba(255,255,255,.08);
+  border-radius: 50%;
+  top: -120px;
+  left: -100px;
+}
+
+.cta-card::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  background: rgba(255,255,255,.08);
+  border-radius: 50%;
+  bottom: -100px;
+  right: -80px;
+}
+
+.cta-card h2 {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 15px;
+}
+
+.cta-card p {
+  position: relative;
+  z-index: 2;
+  opacity: .95;
+  margin-bottom: 20px;
+}
+
+.cta-card .btn {
+  position: relative;
+  z-index: 2;
+  background: white;
+  color: var(--primary);
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 12px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .stat-item {
+    border: none !important;
+    margin-bottom: 25px;
+  }
+
+  .timeline::before {
+    right: 24px;
+  }
+
+  .timeline-item {
+    gap: 15px;
+  }
+
+  .cta-card {
+    padding: 50px 20px;
+  }
+
+}
