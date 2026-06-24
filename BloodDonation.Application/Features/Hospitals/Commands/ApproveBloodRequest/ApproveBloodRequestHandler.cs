@@ -17,16 +17,16 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
     {
 
         private readonly IApplicationDbContext _dbContext;
-        private readonly INotificationService _notificationService;
+        
         private readonly INotificationAgentQueue _notificationAgentQueue;
 
         public ApproveBloodRequestHandler(
             IApplicationDbContext dbContext,
-            INotificationService notificationService,
+           
             INotificationAgentQueue notificationAgentQueue)
         {
             _dbContext = dbContext;
-            _notificationService = notificationService;
+           
             _notificationAgentQueue = notificationAgentQueue;
         }
 
@@ -70,14 +70,7 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _notificationService.CreateAsync(
-                   bloodRequest.CreatedByUserId,
-                   "Blood Request Approved",
-                   "Your blood request has been approved by the hospital.",
-                   bloodRequest.Id,
-                   "BloodRequest",
-                   cancellationToken);
-
+            
             await _notificationAgentQueue.EnqueueAsync(
                 bloodRequest.Id,
                 cancellationToken);

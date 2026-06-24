@@ -129,22 +129,22 @@ public class DonorService : IDonorService
             .ToListAsync();
     }
 
-    public async Task<List<DonorForValidationDto>> GetAvailableDonorsAsync()
-    {
-        var cutoffDate = DateTime.UtcNow.AddDays(-90);
+    //public async Task<List<AvailableDonorDto>> GetAvailableDonorsAsync()
+    //{
+    //    var cutoffDate = DateTime.UtcNow.AddDays(-90);
 
-        return await _context.Users
-            .Where(u =>
-                u.Role == UserRole.User &&
-                u.IsAvailable == true &&
-                u.BloodType.HasValue &&
-                (u.LastDonationDate == null || u.LastDonationDate <= cutoffDate))
-            .Select(u => new DonorForValidationDto
-            {
-                Id = u.Id,
-                BloodType = u.BloodType.ToString()
-            })
-            .ToListAsync();
-    }
+    //    return await _context.Users
+    //        .Where(u =>
+    //            u.Role == UserRole.User &&
+    //            u.IsAvailable == true &&
+    //            u.BloodType.HasValue &&
+    //            (u.LastDonationDate == null || u.LastDonationDate <= cutoffDate))
+    //        .Select(u => new AvailableDonorDto
+    //        {
+    //            Id = u.Id,
+    //            BloodType = u.BloodType.ToString()
+    //        })
+    //        .ToListAsync();
+    //}
     private static double ToRad(double deg) => deg * Math.PI / 180;
 }

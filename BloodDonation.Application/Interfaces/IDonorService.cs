@@ -9,6 +9,6 @@ public interface IDonorService
     Task UpdateAvailabilityAsync(Guid donorId, bool isAvailable);
     Task<List<DonationHistoryDto>> GetDonationHistoryAsync(Guid donorId);
     Task<List<EligibleDonorDto>> GetEligibleDonorsAsync(BloodType bloodType);
-    Task<List<DonorForValidationDto>> GetAvailableDonorsAsync();
+    Task<List<AvailableDonorDto>> GetAvailableDonorsAsync();
 
 }
