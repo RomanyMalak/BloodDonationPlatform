@@ -1,7 +1,6 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
 using BloodDonation.Infrastructure.Extensions;
-using BloodDonation.Infrastructure.Hubs;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -23,8 +22,6 @@ builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSignalR();
 
 builder.Services.AddAuthorization();
 
@@ -74,26 +71,6 @@ builder.Services.AddAuthentication(options =>
 
             ClockSkew = TimeSpan.Zero
         };
-
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            var accessToken =
-                context.Request.Query["access_token"];
-
-            var path =
-                context.HttpContext.Request.Path;
-
-            if (!string.IsNullOrEmpty(accessToken)
-                && path.StartsWithSegments("/hubs/notifications"))
-            {
-                context.Token = accessToken;
-            }
-
-            return Task.CompletedTask;
-        }
-    };
 });
 
 #endregion
@@ -171,8 +148,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapHub<NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())
 {

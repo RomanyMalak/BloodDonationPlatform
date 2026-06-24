@@ -1,5 +1,4 @@
 using BloodDonation.Application.Interfaces;
-using BloodDonation.Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -18,30 +17,6 @@ public class NotificationsController : ControllerBase
         _notificationService = notificationService;
     }
 
-    [HttpPost("send")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Send(
-        [FromBody] SendNotificationRequestDto request,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var notification = await _notificationService.SendAsync(
-                request,
-                cancellationToken);
-
-            return Ok(notification);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
     // GET /api/notifications/my
     [HttpGet]
     [HttpGet("my")]
@@ -55,14 +30,6 @@ public class NotificationsController : ControllerBase
             userId.Value,
             cancellationToken);
 
-        return Ok(notifications);
-    }
-
-    [HttpGet("admin")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetAdminNotifications(CancellationToken cancellationToken)
-    {
-        var notifications = await _notificationService.GetAdminNotificationsAsync(cancellationToken);
         return Ok(notifications);
     }
 
@@ -98,14 +65,6 @@ public class NotificationsController : ControllerBase
             cancellationToken);
 
         return Ok(new { message = "تم تعليم كل الإشعارات كمقروءة", count });
-    }
-
-    [HttpPost("retry-failed")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RetryFailed(CancellationToken cancellationToken)
-    {
-        var result = await _notificationService.RetryFailedAsync(cancellationToken);
-        return Ok(result);
     }
 
     private Guid? GetCurrentUserId()
