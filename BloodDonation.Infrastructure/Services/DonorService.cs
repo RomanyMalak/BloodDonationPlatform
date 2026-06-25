@@ -78,7 +78,7 @@ public class DonorService : IDonorService
             .ToListAsync();
     }
 
-    private static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    public static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
         const double R = 6371; // km
         var dLat = ToRad(lat2 - lat1);

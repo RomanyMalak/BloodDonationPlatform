@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 
 namespace BloodDonation.Application.DTOs
 {
-    public record AvailableDonorDto(
-    Guid Id,
-    string FullName,
-    BloodType BloodType
-);
+    public class AvailableDonorDto
+    {
+        public Guid Id { get; set; }
+
+        public string FullName { get; set; } = string.Empty;
+
+        public string BloodType { get; set; } = string.Empty;
+    }
 }

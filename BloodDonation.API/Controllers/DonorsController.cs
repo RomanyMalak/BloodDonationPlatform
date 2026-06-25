@@ -1,7 +1,11 @@
+using BloodDonation.Application.Features.Donors.Query;
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Enums;
+using BloodDonation.Infrastructure.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace BloodDonation.API.Controllers;
@@ -12,10 +16,14 @@ namespace BloodDonation.API.Controllers;
 public class DonorsController : ControllerBase
 {
     private readonly IDonorService _donorService;
+    private readonly IDonorMatchingService donorMatchingService;
+    private readonly IMediator _mediator;
 
-    public DonorsController(IDonorService donorService)
+    public DonorsController(IDonorService donorService , IDonorMatchingService donorMatchingService, IMediator mediator)
     {
         _donorService = donorService;
+        this.donorMatchingService = donorMatchingService;
+        _mediator = mediator;
     }
 
     // GET /api/donors/nearby-requests
@@ -66,11 +74,20 @@ public class DonorsController : ControllerBase
     }
     [AllowAnonymous]
     [HttpGet("available")]
-    public async Task<IActionResult> GetAvailableDonors()
+    //public async Task<IActionResult> GetAvailableDonors()
+    //{
+    //    var donors = await _donorService.GetAvailableDonorsAsync();
+    //    return Ok(donors);
+    //}
+    [HttpGet("{requestId}")]
+    public async Task<IActionResult> GetAvailableBloodTypes(Guid requestId)
     {
-        var donors = await _donorService.GetAvailableDonorsAsync();
-        return Ok(donors);
+        var result = await _mediator.Send(
+            new GetAvailableBloodTypesQuery(requestId));
+
+        return Ok(result);
     }
+
     private Guid? GetCurrentUserId()
     {
         var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

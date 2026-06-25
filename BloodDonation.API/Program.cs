@@ -1,8 +1,9 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
+using BloodDonation.Application.Interfaces;
 using BloodDonation.Infrastructure.Extensions;
-using BloodDonation.Infrastructure.Hubs;
 using BloodDonation.Infrastructure.Persistence;
+using BloodDonation.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,14 +19,15 @@ builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration); //استدعاء الـ Extension Method
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<
+    IMedicalValidatorAgent,
+    MedicalValidatorAgent>();
 
 builder.Services.AddControllers();
 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSignalR();
 
 builder.Services.AddAuthorization();
 
@@ -75,26 +77,6 @@ builder.Services.AddAuthentication(options =>
 
             ClockSkew = TimeSpan.Zero
         };
-
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            var accessToken =
-                context.Request.Query["access_token"];
-
-            var path =
-                context.HttpContext.Request.Path;
-
-            if (!string.IsNullOrEmpty(accessToken)
-                && path.StartsWithSegments("/hubs/notifications"))
-            {
-                context.Token = accessToken;
-            }
-
-            return Task.CompletedTask;
-        }
-    };
 });
 
 #endregion
@@ -172,8 +154,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapHub<NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())
 {

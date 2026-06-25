@@ -16,18 +16,15 @@ public sealed class VerifyBloodRequestDocumentHandler
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrService _ocrService;
     private readonly INotificationService _notificationService;
-    private readonly INotificationAgentQueue _notificationAgentQueue;
 
     public VerifyBloodRequestDocumentHandler(
         IApplicationDbContext dbContext,
         IOcrService ocrService,
-        INotificationService notificationService,
-        INotificationAgentQueue notificationAgentQueue)
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _ocrService = ocrService;
         _notificationService = notificationService;
-        _notificationAgentQueue = notificationAgentQueue;
     }
 
 
@@ -105,13 +102,6 @@ public sealed class VerifyBloodRequestDocumentHandler
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        if (result.IsVerified)
-        {
-            await _notificationAgentQueue.EnqueueAsync(
-                bloodRequest.Id,
-                cancellationToken);
-        }
 
         return result;
     }

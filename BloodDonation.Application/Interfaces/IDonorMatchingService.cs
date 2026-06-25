@@ -5,7 +5,10 @@ namespace BloodDonation.Application.Interfaces;
 
 public interface IDonorMatchingService
 {
-    Task<List<AvailableDonorDto>> GetAvailableDonorsAsync(
-         BloodRequest bloodRequest,
+     Task<AvailableBloodTypesResponse> GetAvailableBloodTypesAsync(
+         Guid bloodRequestId,
          CancellationToken cancellationToken);
+    Task<List<AvailableDonorDto>> GetMatchedDonorsAsync(
+        Guid bloodRequestId,
+        CancellationToken cancellationToken);
 }
