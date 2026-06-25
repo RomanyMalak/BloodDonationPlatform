@@ -44,9 +44,9 @@ namespace BloodDonation.Infrastructure.Services
 
             _httpClient.DefaultRequestHeaders.Clear();
 
-            _httpClient.DefaultRequestHeaders.Add(
-                "x-api-key",
-                _configuration["LangflowSettings:ApiKey"]);
+            //_httpClient.DefaultRequestHeaders.Add(
+            //    "x-api-key",
+            //    _configuration["LangflowSettings:ApiKey"]);
 
             var url =
                 $"{_configuration["LangflowSettings:BaseUrl"]}/api/v1/run/{_configuration["LangflowSettings:FlowId"]}?stream=false";
@@ -77,6 +77,17 @@ namespace BloodDonation.Infrastructure.Services
                 .GetProperty("message")
                 .GetProperty("text")
                 .GetString();
+
+            aiText = aiText.Trim();
+
+            if (aiText.StartsWith("```"))
+            {
+                aiText = aiText
+                    .Replace("```json", "")
+                    .Replace("```", "")
+                    .Trim();
+            }
+            Console.WriteLine($"RAW AI TEXT = [{aiText}]");
 
             var compatibleBloodTypes = JsonSerializer.Deserialize<CompatibleBloodTypesDto>(aiText);
 
