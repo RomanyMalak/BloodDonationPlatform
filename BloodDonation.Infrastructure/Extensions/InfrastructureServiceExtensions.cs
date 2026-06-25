@@ -32,6 +32,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IDonorService, DonorService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IHospitalService, HospitalService>();
+        services.AddScoped<IDonorMatchingService, DonorMatchingService>();
+        services.AddScoped<IDonorQueryService, DonorQueryService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IOcrService, OcrService>();
         services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();

@@ -18,13 +18,16 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
 
         private readonly IApplicationDbContext _dbContext;
         private readonly INotificationService _notificationService;
+       private readonly IDonorMatchingService _donorMatchingService;
 
         public ApproveBloodRequestHandler(
             IApplicationDbContext dbContext,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IDonorMatchingService donorMatchingService)
         {
             _dbContext = dbContext;
             _notificationService = notificationService;
+            _donorMatchingService = donorMatchingService;
         }
 
         public async Task<BloodRequestDetailsDto?> Handle(
@@ -65,15 +68,31 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
             bloodRequest.ApprovedByHospitalId = request.HospitalId;
             bloodRequest.ApprovedAt = DateTime.UtcNow;
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
+           
             await _notificationService.CreateAsync(
-                   bloodRequest.CreatedByUserId,
-                   "Blood Request Approved",
-                   "Your blood request has been approved by the hospital.",
-                   bloodRequest.Id,
-                   "BloodRequest",
-                   cancellationToken);
+                  bloodRequest.CreatedByUserId,
+                  "Blood Request Approved",
+                  "Your blood request has been approved by the hospital.",
+                  bloodRequest.Id,
+                  "BloodRequest",
+                  cancellationToken);
+
+            var matchedDonors =
+            await _donorMatchingService.GetMatchedDonorsAsync(
+            bloodRequest.Id,
+            cancellationToken);
+
+            foreach (var donor in matchedDonors)
+            {
+                await _notificationService.CreateAsync(
+                    donor.Id,
+                    "Urgent Blood Donation Request",
+                    $"A nearby patient needs {bloodRequest.RequiredBloodType} blood.",
+                    bloodRequest.Id,
+                    "BloodRequest",
+                    cancellationToken);
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return new BloodRequestDetailsDto
             {

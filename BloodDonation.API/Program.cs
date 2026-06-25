@@ -1,7 +1,9 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
+using BloodDonation.Application.Interfaces;
 using BloodDonation.Infrastructure.Extensions;
 using BloodDonation.Infrastructure.Persistence;
+using BloodDonation.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration); //استدعاء الـ Extension Method
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<
+    IMedicalValidatorAgent,
+    MedicalValidatorAgent>();
 
 builder.Services.AddControllers();
 

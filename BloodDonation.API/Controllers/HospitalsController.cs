@@ -21,16 +21,12 @@ public class HospitalsController : ControllerBase
     private readonly IApplicationDbContext _dbContext;
     private readonly IHospitalService _hospitalService;
 
-    public HospitalsController(
-        IMediator mediator,
-        IApplicationDbContext dbContext,
-        IHospitalService hospitalService)
+    public HospitalsController(IMediator mediator, IApplicationDbContext dbContext,IHospitalService hospitalService)
     {
         _mediator = mediator;
         _dbContext = dbContext;
         _hospitalService = hospitalService;
     }
-
     private async Task<Guid?> GetHospitalIdFromJwt(CancellationToken ct)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -145,6 +141,7 @@ public class HospitalsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
 
     // ══════════════════════════════════════════════════════
     //  HOSPITAL ENDPOINTS  [Authorize(Roles = "Hospital")]
