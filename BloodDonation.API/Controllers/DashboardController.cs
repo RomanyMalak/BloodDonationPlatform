@@ -1,7 +1,9 @@
 using BloodDonation.Application.Features.Auth.Commands.CreateAdmin;
+using BloodDonation.Application.Features.Dashboard.GetAllAdmins;
 using BloodDonation.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloodDonation.API.Controllers;
@@ -30,6 +32,16 @@ public class DashboardController : ControllerBase
         return result
             ? Ok("Admin created successfully.")
             : BadRequest("Email already exists.");
+    }
+
+    [HttpGet("admins")]
+    public async Task<IActionResult> GetAdmins()
+    {
+        var result =
+            await _mediator.Send(
+                new GetAllAdminsQuery());
+
+        return Ok(result);
     }
 
     // GET /api/dashboard/stats
