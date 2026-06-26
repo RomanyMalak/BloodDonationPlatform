@@ -16,9 +16,9 @@ namespace BloodDonation.Infrastructure.Services
          string folderName, 
          CancellationToken cancellationToken = default) 
         {
-           
+
             if (file == null || file.Length == 0)
-                return null; // No file uploaded, return null or handle as needed.
+                throw new InvalidOperationException("No file was uploaded."); 
 
             // Get file extension in lower-case for validation.
             var extension = Path.GetExtension(file.FileName).ToLower();

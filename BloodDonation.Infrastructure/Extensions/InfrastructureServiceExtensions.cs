@@ -1,8 +1,10 @@
 ﻿using BloodDonation.Application.Interfaces;
 using BloodDonation.Application.Interfaces.Repositories;
+using BloodDonation.Infrastructure.Gemini;
 using BloodDonation.Infrastructure.Persistence;
 using BloodDonation.Infrastructure.Repositories;
 using BloodDonation.Infrastructure.Services;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +40,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IOcrService, OcrService>();
         services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();
         services.AddHostedService<OcrBackgroundService>();
+        services.AddHttpClient<GeminiClient>();
+        services.AddScoped<GeminiResponseParser>();
 
         return services;
     }

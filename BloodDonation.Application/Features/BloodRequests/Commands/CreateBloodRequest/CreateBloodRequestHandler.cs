@@ -1,4 +1,5 @@
 ﻿using BloodDonation.Application.DTOs.BloodRequest;
+using BloodDonation.Application.Exceptions;
 using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest;
 
-public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodRequestCommand, CreateBloodRequestResponseDto>
+public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodRequestCommand, CreateBloodRequestResponseDto>
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrVerificationQueue _ocrQueue;
@@ -26,27 +27,34 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
 
     public async Task<CreateBloodRequestResponseDto> Handle(CreateBloodRequestCommand request, CancellationToken cancellationToken)
     {
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(x => x.Id == request.CreatedByUserId, cancellationToken);
+
+        if (user is null)
+            throw new InvalidOperationException("Authenticated user not found.");
+
         bool hospitalCanApprove = false;
         if (request.HospitalId.HasValue)
         {
             hospitalCanApprove = await _dbContext.Hospitals
                 .AnyAsync(h =>
                     h.Id == request.HospitalId.Value &&
-                    h.IsActive,  
+                    h.IsActive,
                     cancellationToken);
         }
 
-        var user = await _dbContext.Users.FirstAsync(x => x.Id == request.CreatedByUserId, cancellationToken);
-        string savedDbPath = await _fileService.UploadFileAsync(request.MedicalDocumentUrl, "MedicalDocuments", cancellationToken);
+        string savedDbPath = await _fileService.UploadFileAsync(
+            request.MedicalDocumentUrl, "MedicalDocuments", cancellationToken);
 
         var bloodRequest = new BloodRequest
         {
             Id = Guid.NewGuid(),
 
             PatientName = request.PatientName ?? user.FullName,
-            PatientAge =request.PatientAge ?? user.Age,
-            RequiredBloodType = request.RequiredBloodType?? user.BloodType ?? throw new Exception("Blood type is required."),
-            Status =RequestStatus.PendingVerification,
+            PatientAge = request.PatientAge ?? user.Age,
+            RequiredBloodType = request.RequiredBloodType ?? user.BloodType
+                ?? throw new InvalidOperationException("Blood type is required."),
+            Status = RequestStatus.PendingVerification,
             HospitalId = request.HospitalId,
             CustomHospitalName = request.CustomHospitalName,
             Latitude = request.Latitude,
@@ -60,16 +68,28 @@ public sealed class CreateBloodRequestHandler: IRequestHandler<CreateBloodReques
             CreatedAt = DateTime.UtcNow
         };
 
+        if (request.HospitalId.HasValue)
+        {
+            var hospitalExists = await _dbContext.Hospitals
+                .AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
+
+            if (!hospitalExists)
+            {
+                throw new NotFoundException("Hospital not found.");
+            }
+        }
+
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        if(!hospitalCanApprove)
+
+        if (!hospitalCanApprove)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
-
         }
+
         var message = hospitalCanApprove
-        ? "Request submitted. Waiting for hospital approval."
-        : "Request submitted. Document verification in progress.";
+            ? "Request submitted. Waiting for hospital approval."
+            : "Request submitted. Document verification in progress.";
 
         return new CreateBloodRequestResponseDto
         {
