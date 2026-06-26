@@ -26,10 +26,16 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
             RuleFor(x => x.Urgency)
                 .IsInEnum().WithMessage("Urgency level is invalid.");
 
-            // قاعدة منطقية: لازم HospitalId أو CustomHospitalName، مش الاتنين، ومش ولا واحد
             RuleFor(x => x)
-                .Must(x => x.HospitalId.HasValue ^ !string.IsNullOrWhiteSpace(x.CustomHospitalName))
-                .WithMessage("Provide either a registered HospitalId or a CustomHospitalName, not both or neither.");
+                   .Must(x => x.HospitalId.HasValue ||
+                   !string.IsNullOrWhiteSpace(x.CustomHospitalName))
+                   .WithMessage("Provide either a registered HospitalId or a CustomHospitalName.");
+
+            RuleFor(x => x)
+                  .Must(x => !(x.HospitalId.HasValue &&
+                  !string.IsNullOrWhiteSpace(x.CustomHospitalName)))
+                  .WithMessage("Provide either HospitalId or CustomHospitalName, not both.");
+
 
             RuleFor(x => x.CustomHospitalName)
                 .MaximumLength(100)
@@ -44,10 +50,29 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
                 .InclusiveBetween(-180, 180)
                 .WithMessage("Longitude must be a valid coordinate.");
 
+
+            // Document required for custom hospital
             RuleFor(x => x.MedicalDocumentUrl)
-                .NotNull().WithMessage("Medical document is required.")
-                .Must(HasValidSize).WithMessage("File size must not exceed 10 MB.")
-                .Must(HasValidExtension).WithMessage("Only JPG, PNG, or PDF files are allowed.");
+                .NotNull()
+                .When(x => !x.HospitalId.HasValue &&
+                           !string.IsNullOrWhiteSpace(x.CustomHospitalName))
+                .WithMessage("Medical document is required for custom hospitals.");
+
+
+            // Document not allowed for registered hospital
+            RuleFor(x => x.MedicalDocumentUrl)
+                .Empty()
+                .When(x => x.HospitalId.HasValue)
+                .WithMessage("Medical document is not allowed for registered hospitals.");
+
+
+            // File validation
+            RuleFor(x => x.MedicalDocumentUrl)
+                .Must(HasValidSize)
+                .WithMessage("File size must not exceed 10 MB.")
+                .Must(HasValidExtension)
+                .WithMessage("Only JPG, PNG, or PDF files are allowed.")
+                .When(x => x.MedicalDocumentUrl != null);
 
             RuleFor(x => x.ContactPhone)
                 .NotEmpty().WithMessage("Contact phone is required.")
