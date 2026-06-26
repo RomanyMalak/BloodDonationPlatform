@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using BloodDonation.Application.Exceptions;
+using System.Net;
 using System.Text.Json;
 
 namespace BloodDonation.API.Middewares
@@ -66,31 +67,56 @@ namespace BloodDonation.API.Middewares
         {
             context.Response.ContentType = "application/json";
 
-            
             var statusCode = HttpStatusCode.InternalServerError;
             var message = "حدث خطأ غير متوقع في السيرفر، يرجى المحاولة لاحقاً.";
+            object? errors = null;
 
-          
             if (exception is UnauthorizedAccessException)
             {
                 statusCode = HttpStatusCode.Unauthorized;
                 message = "غير مصرح لك بالوصول لهذا المورد.";
             }
+            else if (exception is ConflictException conflictEx)
+            {
+                statusCode = HttpStatusCode.Conflict;
+                message = conflictEx.Message;
+            }
+            else if (exception is NotFoundException notFoundEx)
+            {
+                statusCode = HttpStatusCode.NotFound;
+                message = notFoundEx.Message;
+            }
+            else if (exception is FluentValidation.ValidationException validationEx)
+            {
+                statusCode = HttpStatusCode.BadRequest;
+                message = "بيانات الطلب غير صحيحة.";
+                errors = validationEx.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(e => e.ErrorMessage).ToArray());
+            }
 
             context.Response.StatusCode = (int)statusCode;
 
-           
             var response = new CustomErrorResponse
             {
                 StatusCode = context.Response.StatusCode,
                 Message = message,
-               
                 Details = _env.IsDevelopment() ? exception.StackTrace?.ToString() : null
             };
 
-          
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            var json = JsonSerializer.Serialize(response, options);
+
+            var json = errors is null
+                ? JsonSerializer.Serialize(response, options)
+                : JsonSerializer.Serialize(new
+                {
+                    statusCode = response.StatusCode,
+                    message = response.Message,
+                    errors,
+                    details = response.Details
+                }, options);
 
             await context.Response.WriteAsync(json);
         }

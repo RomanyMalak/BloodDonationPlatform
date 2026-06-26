@@ -80,24 +80,30 @@ public class BloodRequestsController : ControllerBase
         return Ok(result);
     }
 
-    // POST api/blood-requests/{id}/accept
     [HttpPost("{id:guid}/acceptBloodRequest")]
     public async Task<IActionResult> Accept(
-        Guid id,
-        CancellationToken cancellationToken)
+    Guid id,
+    CancellationToken cancellationToken)
     {
         var donorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (donorId is null) return Unauthorized();
 
-        await _mediator.Send(
-            new AcceptBloodRequestCommand
-            {
-                BloodRequestId = id,
-                DonorId = Guid.Parse(donorId)
-            },
-            cancellationToken);
+        try
+        {
+            await _mediator.Send(
+                new AcceptBloodRequestCommand
+                {
+                    BloodRequestId = id,
+                    DonorId = Guid.Parse(donorId)
+                },
+                cancellationToken);
 
-        return Ok("Request accepted successfully.");
+            return Ok("Request accepted successfully.");
+        }
+        catch (Exception)
+        {
+            return BadRequest("Unable to accept this request.");
+        }
     }
 
     // PUT api/blood-requests/{id}/cancel

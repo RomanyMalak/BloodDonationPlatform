@@ -1,4 +1,5 @@
-﻿using BloodDonation.Application.Interfaces;
+﻿using BloodDonation.Application.Exceptions;
+using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using MediatR;
@@ -26,7 +27,7 @@ namespace BloodDonation.Application.Features.Auth.Commands.Register
             var existingemail = await _context.Users.AnyAsync(u => u.Email == normalizedEmail, cancellationToken);
             if (existingemail)
             {
-                throw new Exception("Email already exists");
+                throw new ConflictException("Email already exists");
             }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
