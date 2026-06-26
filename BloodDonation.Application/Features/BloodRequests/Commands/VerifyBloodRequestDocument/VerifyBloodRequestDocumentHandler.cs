@@ -16,15 +16,18 @@ public sealed class VerifyBloodRequestDocumentHandler
     private readonly IApplicationDbContext _dbContext;
     private readonly IOcrService _ocrService;
     private readonly INotificationService _notificationService;
+    private readonly IDonorMatchingService _donorMatchingService;
 
     public VerifyBloodRequestDocumentHandler(
         IApplicationDbContext dbContext,
         IOcrService ocrService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IDonorMatchingService donorMatchingService)
     {
         _dbContext = dbContext;
         _ocrService = ocrService;
         _notificationService = notificationService;
+        _donorMatchingService = donorMatchingService;
     }
 
 
@@ -89,6 +92,23 @@ public sealed class VerifyBloodRequestDocumentHandler
                 "تم قبول طلبك",
                 "تم التحقق من وثيقتك بنجاح.",
                 bloodRequest.Id, "OCR", cancellationToken);
+
+            var matchedDonors =
+            await _donorMatchingService.GetMatchedDonorsAsync(
+            bloodRequest.Id,
+            cancellationToken);
+
+            foreach (var donor in matchedDonors)
+            {
+                await _notificationService.CreateAsync(
+                    donor.Id,
+                    "Urgent Blood Donation Request",
+                    $"A nearby patient needs {bloodRequest.RequiredBloodType} blood.",
+                    bloodRequest.Id,
+                    "BloodRequest",
+                    cancellationToken);
+            }
+
         }
         else
         {
