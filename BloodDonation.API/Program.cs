@@ -1,6 +1,8 @@
 ﻿using BloodDonation.API.Middewares;
 using BloodDonation.Application.Extensions;
 using BloodDonation.Application.Interfaces;
+using BloodDonation.API.Hubs;
+using BloodDonation.API.Services;
 using BloodDonation.Infrastructure.Extensions;
 using BloodDonation.Infrastructure.Persistence;
 using BloodDonation.Infrastructure.Services;
@@ -25,6 +27,11 @@ builder.Services.AddHttpClient<
 
 builder.Services.AddControllers();
 
+builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<NotificationConnectionTracker>();
+builder.Services.AddScoped<INotificationSender, SignalRNotificationSender>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -35,7 +42,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClientPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "http://127.0.0.1:5500", "http://127.0.0.1:5500")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -77,6 +84,23 @@ builder.Services.AddAuthentication(options =>
 
             ClockSkew = TimeSpan.Zero
         };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs/notifications"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 #endregion
@@ -155,6 +179,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHub<NotificationHub>("/hubs/notifications")
+   .RequireCors("AngularClientPolicy");
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
