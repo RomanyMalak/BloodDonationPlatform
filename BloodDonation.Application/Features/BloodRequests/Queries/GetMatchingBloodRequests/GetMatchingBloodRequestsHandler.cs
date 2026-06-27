@@ -5,25 +5,25 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Application.Features.BloodRequests.Queries.GetCompletedBloodRequests;
-public sealed class GetCompletedBloodRequestsHandler
-    : IRequestHandler<GetCompletedBloodRequestsQuery, List<CompleteBloodRequestDto>>
+public sealed class GetMatchingBloodRequestsHandler
+    : IRequestHandler<GetMatchingBloodRequestsQuery, List<CompleteBloodRequestDto>>
 {
 
     private readonly IApplicationDbContext _context;
-    public GetCompletedBloodRequestsHandler(
+    public GetMatchingBloodRequestsHandler(
         IApplicationDbContext context)
     {
         _context = context;
     }
     public async Task<List<CompleteBloodRequestDto>> Handle(
-        GetCompletedBloodRequestsQuery request,
+        GetMatchingBloodRequestsQuery request,
         CancellationToken cancellationToken)
     {
 
         return await _context.BloodRequests
             .Include(x => x.Hospital)
             .Where(x =>
-                x.Status == RequestStatus.Completed)
+                x.Status == RequestStatus.Matching)
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new CompleteBloodRequestDto
             {
@@ -35,7 +35,6 @@ public sealed class GetCompletedBloodRequestsHandler
                 Status =x.Status.ToString(),
                 HospitalName =x.Hospital != null? x.Hospital.Name : x.CustomHospitalName!,
                 CreatedAt =x.CreatedAt,
-
             })
             .ToListAsync(cancellationToken);
     }
