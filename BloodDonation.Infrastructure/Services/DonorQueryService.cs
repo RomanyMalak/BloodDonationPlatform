@@ -4,11 +4,7 @@ using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace BloodDonation.Infrastructure.Services
 {

@@ -22,7 +22,7 @@ public class GeminiClient
             ?? throw new Exception("Gemini key missing");
 
         _model = configuration["Gemini:Model"]
-            ?? "gemini-1.5-flash";
+            ?? "gemini-2.5-flash";
     }
 
 
