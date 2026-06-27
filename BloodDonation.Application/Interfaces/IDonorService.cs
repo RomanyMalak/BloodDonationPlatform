@@ -8,7 +8,6 @@ public interface IDonorService
     Task<List<DonorNearbyRequestDto>> GetNearbyRequestsAsync(Guid donorId);
     Task UpdateAvailabilityAsync(Guid donorId, bool isAvailable);
     Task<List<DonationHistoryDto>> GetDonationHistoryAsync(Guid donorId);
-    Task<List<EligibleDonorDto>> GetEligibleDonorsAsync(BloodType bloodType);
-    //Task<List<AvailableDonorDto>> GetAvailableDonorsAsync();
+   
 
 }

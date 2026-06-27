@@ -43,8 +43,14 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
                     cancellationToken);
         }
 
-        string savedDbPath = await _fileService.UploadFileAsync(
-            request.MedicalDocumentUrl, "MedicalDocuments", cancellationToken);
+        string? savedDbPath = null;
+        if (request.MedicalDocumentUrl != null)
+        {
+            savedDbPath = await _fileService.UploadFileAsync(
+                request.MedicalDocumentUrl,
+                "MedicalDocuments",
+                cancellationToken);
+        }
 
         var bloodRequest = new BloodRequest
         {
@@ -70,19 +76,22 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
 
         if (request.HospitalId.HasValue)
         {
-            var hospitalExists = await _dbContext.Hospitals
-                .AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
+            var hospital = await _dbContext.Hospitals
+                .FirstOrDefaultAsync(
+                    h => h.Id == request.HospitalId.Value,
+                    cancellationToken);
 
-            if (!hospitalExists)
-            {
+            if (hospital is null)
                 throw new NotFoundException("Hospital not found.");
-            }
+
+            if (!hospital.IsActive)
+                throw new NotFoundException("Hospital is not active.");
         }
 
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if (!hospitalCanApprove)
+        if (!hospitalCanApprove && request.MedicalDocumentUrl != null)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
         }

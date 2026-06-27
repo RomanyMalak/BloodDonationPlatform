@@ -29,7 +29,7 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodR
 
         public double Longitude { get; init; }
 
-        public IFormFile MedicalDocumentUrl { get; init; }
+        public IFormFile? MedicalDocumentUrl { get; init; }
 
         public string? Notes { get; init; }
 

@@ -3,16 +3,24 @@ using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BloodDonation.Infrastructure.Services;
 
 public class NotificationService : INotificationService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationSender _notificationSender;
+    private readonly ILogger<NotificationService> _logger;
 
-    public NotificationService(AppDbContext context)
+    public NotificationService(
+        AppDbContext context,
+        INotificationSender notificationSender,
+        ILogger<NotificationService> logger)
     {
         _context = context;
+        _notificationSender = notificationSender;
+        _logger = logger;
     }
 
     public async Task<List<NotificationDto>> GetUserNotificationsAsync(
@@ -87,6 +95,21 @@ public class NotificationService : INotificationService
 
         await _context.Notifications.AddAsync(notification, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _notificationSender.SendToUserAsync(
+                userId,
+                MapToDto(notification),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "SignalR notification send failed for notification {NotificationId}.",
+                notification.Id);
+        }
     }
 
     private static NotificationDto MapToDto(Notification notification)
