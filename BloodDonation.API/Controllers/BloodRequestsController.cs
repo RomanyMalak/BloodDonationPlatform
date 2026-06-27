@@ -59,7 +59,7 @@ public class BloodRequestsController : ControllerBase
     public async Task<IActionResult> GetCompleted(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetCompletedBloodRequestsQuery(),
+            new GetMatchingBloodRequestsQuery(),
             cancellationToken);
 
         return Ok(result);
@@ -88,24 +88,15 @@ public class BloodRequestsController : ControllerBase
         var donorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (donorId is null) return Unauthorized();
 
-        try
-        {
-            var result = await _mediator.Send(
-                new AcceptBloodRequestCommand
-                {
-                    BloodRequestId = id,
-                    DonorId = Guid.Parse(donorId)
-                },
-                cancellationToken);
+        await _mediator.Send(
+            new AcceptBloodRequestCommand
+            {
+                BloodRequestId = id,
+                DonorId = Guid.Parse(donorId)
+            },
+            cancellationToken);
 
-            return result
-                ? Ok("Request accepted successfully.")
-                : BadRequest("Unable to accept this request.");
-        }
-        catch (Exception)
-        {
-            return BadRequest("Unable to accept this request.");
-        }
+        return Ok("Request accepted successfully.");
     }
 
     // PUT api/blood-requests/{id}/cancel

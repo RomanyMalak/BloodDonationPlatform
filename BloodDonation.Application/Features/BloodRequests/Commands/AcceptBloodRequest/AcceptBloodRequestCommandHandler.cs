@@ -1,4 +1,5 @@
-﻿using BloodDonation.Application.Interfaces;
+﻿using BloodDonation.Application.Exceptions;
+using BloodDonation.Application.Interfaces;
 using BloodDonation.Domain.Entities;
 using BloodDonation.Domain.Enums;
 using MediatR;
@@ -10,6 +11,7 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.AcceptBloodR
 public sealed class AcceptBloodRequestCommandHandler
     : IRequestHandler<AcceptBloodRequestCommand, bool>
 {
+    private const double SearchRadiusKm = 50;
 
     private readonly IApplicationDbContext _dbContext;
     private readonly INotificationService _notificationService;
@@ -28,40 +30,65 @@ public sealed class AcceptBloodRequestCommandHandler
     {
         var bloodRequest =
             await _dbContext.BloodRequests
-            .Include(x => x.Acceptances)
-            .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId,cancellationToken);
-
+            .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId, cancellationToken);
 
         if (bloodRequest is null)
-            return false;
+            throw new NotFoundException("Blood request not found.");
 
         if (bloodRequest.Status != RequestStatus.Matching)
-            return false;
+        {
+            throw new ConflictException(
+                $"This request cannot be accepted because its status is '{bloodRequest.Status}'.");
+        }
 
         var donor = await _dbContext.Users
             .FirstOrDefaultAsync(x => x.Id == request.DonorId, cancellationToken);
 
-        if (donor is null ||
-            donor.Role != UserRole.User ||
-            !donor.IsAvailable ||
-            donor.Id == bloodRequest.CreatedByUserId ||
-            !donor.BloodType.HasValue ||
-            !IsCompatibleDonor(bloodRequest.RequiredBloodType, donor.BloodType.Value) ||
-            !donor.Latitude.HasValue ||
-            !donor.Longitude.HasValue ||
-            CalculateDistance(
-                donor.Latitude.Value,
-                donor.Longitude.Value,
-                bloodRequest.Latitude,
-                bloodRequest.Longitude) > 50)
+        if (donor is null)
+            throw new NotFoundException("Donor not found.");
+
+        if (donor.Role != UserRole.User)
+            throw new ConflictException("Only users with the donor role can accept blood requests.");
+
+        if (donor.Id == bloodRequest.CreatedByUserId)
+            throw new ConflictException("You cannot accept a blood request you created yourself.");
+
+        if (!donor.IsAvailable)
+            throw new ConflictException("You are currently marked as unavailable. Update your availability before accepting requests.");
+
+        if (!donor.BloodType.HasValue)
+            throw new ConflictException("Your blood type is not set. Please update your profile.");
+
+        if (!IsCompatibleDonor(bloodRequest.RequiredBloodType, donor.BloodType.Value))
         {
-            return false;
+            throw new ConflictException(
+                $"Your blood type ({donor.BloodType.Value}) is not compatible with the requested type ({bloodRequest.RequiredBloodType}).");
         }
 
-        var alreadyAccepted =bloodRequest.Acceptances.Any(x =>x.DonorId == request.DonorId);
+        if (!donor.Latitude.HasValue || !donor.Longitude.HasValue)
+            throw new ConflictException("Your location is not set. Please update your profile.");
+
+        var distanceKm = CalculateDistance(
+            donor.Latitude.Value,
+            donor.Longitude.Value,
+            bloodRequest.Latitude,
+            bloodRequest.Longitude);
+
+        if (distanceKm > SearchRadiusKm)
+        {
+            throw new ConflictException(
+                $"You are {distanceKm:0.0} km away, which is outside the {SearchRadiusKm:0} km matching radius for this request.");
+        }
+
+        var alreadyAccepted = await _dbContext.BloodRequestAcceptances
+    .AnyAsync(
+        x => x.BloodRequestId == bloodRequest.Id &&
+             x.DonorId == request.DonorId,
+        cancellationToken);
 
         if (alreadyAccepted)
-            return false;
+            throw new ConflictException("You have already accepted this request.");
+
 
         var acceptance = new BloodRequestAcceptance
         {
@@ -72,23 +99,31 @@ public sealed class AcceptBloodRequestCommandHandler
             Status = AcceptanceStatus.Accepted
         };
 
-        await _dbContext.BloodRequestAcceptances.AddAsync(acceptance, cancellationToken);
+        await _dbContext.BloodRequestAcceptances.AddAsync(
+            acceptance,
+            cancellationToken);
 
-        var acceptedCount =bloodRequest.Acceptances.Count + 1;
+
+        var acceptedCount = await _dbContext.BloodRequestAcceptances
+            .CountAsync(
+                x => x.BloodRequestId == bloodRequest.Id,
+                cancellationToken) + 1;
+
 
         if (acceptedCount >= bloodRequest.UnitsNeeded)
         {
-            bloodRequest.Status =RequestStatus.Accepted;
+            bloodRequest.Status = RequestStatus.Accepted;
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
         await _notificationService.CreateAsync(
-    bloodRequest.CreatedByUserId,
-    "Donor Accepted Your Request",
-    "A donor has accepted your blood request.",
-    bloodRequest.Id,
-    "Acceptance",
-    cancellationToken);
+            bloodRequest.CreatedByUserId,
+            "Donor Accepted Your Request",
+            "A donor has accepted your blood request.",
+            bloodRequest.Id,
+            "Acceptance",
+            cancellationToken);
 
         return true;
     }
