@@ -21,6 +21,24 @@ export class AiPipeline implements OnInit {
   isLoading = true;
   errorMessage = '';
 
+  isCompletedRequest(): boolean {
+    const normalizedStatus = this.request?.status?.trim().toLowerCase();
+    return normalizedStatus === 'matching' || normalizedStatus === 'مكتمل' || normalizedStatus === 'completed' || normalizedStatus === 'complete';
+  }
+
+  getPipelineState(stepIndex: number): 'done' | 'active' | 'waiting' {
+    if (this.isCompletedRequest()) {
+      if (stepIndex < 6) return 'done';
+      return 'active';
+    }
+
+  // طلب لسه بيتعالج — step 2 هو النشط
+  if (stepIndex < 2) return 'done';
+  if (stepIndex === 2) return 'active';
+  return 'waiting';
+}
+
+
   ngOnInit() {
     const nav = this.router.getCurrentNavigation?.();
     const navRequest = nav?.extras?.state?.['request'];

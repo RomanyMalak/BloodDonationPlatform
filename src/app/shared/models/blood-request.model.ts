@@ -18,7 +18,7 @@ export interface BloodRequestDetailsDto {
   requiredBloodType: string;
   urgency: string;
   status: string;
-  hospitalName?: string;
+hospitalName?: string;
   latitude: number;
   longitude: number;
   unitsNeeded: number;

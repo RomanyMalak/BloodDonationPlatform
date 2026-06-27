@@ -43,7 +43,7 @@ export class RequestDetailComponent implements OnInit {
   }
 
   private bloodTypeMapReverse: Record<number, string> = {
-    0: 'A+', 1: 'A-', 2: 'B+', 3: 'B-', 4: 'AB+', 5: 'AB-', 6: 'O+', 7: 'O-'
+    0: 'O+', 1: 'O-', 2: 'A+', 3: 'A-', 4: 'B+', 5: 'B-', 6: 'AB+', 7: 'AB-'
   };
 
   getBloodTypeSymbol(value: number | string | undefined) {

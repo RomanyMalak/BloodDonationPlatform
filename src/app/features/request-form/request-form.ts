@@ -33,8 +33,14 @@ export class RequestFormComponent implements OnInit {
   errorMessage: string = '';
   urgencyMap: Record<string, number> = { normal: 0, urgent: 1, critical: 2 };
   bloodTypeMap: Record<string, number> = {
-    '+A': 0, '-A': 1, '+B': 2, '-B': 3,
-    '+AB': 4, '-AB': 5, '+O': 6, '-O': 7
+    'O+': 0,
+    'O-': 1,
+    'A+': 2,
+    'A-': 3,
+    'B+': 4,
+    'B-': 5,
+    'AB+': 6,
+    'AB-': 7
   };
 
   form = {

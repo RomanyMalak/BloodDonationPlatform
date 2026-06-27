@@ -25,14 +25,14 @@
         <div class="card pipeline-card">
 
           <!-- Request created -->
-          <div class="pipeline-item pipeline-item--done">
+          <div class="pipeline-item" [class.pipeline-item--done]="getPipelineState(1) === 'done'" [class.pipeline-item--active]="getPipelineState(1) === 'active'" [class.pipeline-item--waiting]="getPipelineState(1) === 'waiting'">
             <div class="pipeline-item__indicator">
-              <div class="pipeline-item__dot pipeline-item__dot--done">
+              <div class="pipeline-item__dot" [class.pipeline-item__dot--done]="getPipelineState(1) === 'done'" [class.pipeline-item__dot--active]="getPipelineState(1) === 'active'" [class.pipeline-item__dot--waiting]="getPipelineState(1) === 'waiting'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               </div>
-              <div class="pipeline-item__line pipeline-item__line--done"></div>
+              <div class="pipeline-item__line" [class.pipeline-item__line--done]="getPipelineState(1) === 'done' || getPipelineState(1) === 'active'"></div>
             </div>
             <div class="pipeline-item__content">
               <div class="d-flex align-items-center justify-content-between mb-1">
@@ -46,18 +46,18 @@
           </div>
 
           <!-- Triage Agent -->
-          <div class="pipeline-item pipeline-item--active">
+          <div class="pipeline-item" [class.pipeline-item--done]="getPipelineState(2) === 'done'" [class.pipeline-item--active]="getPipelineState(2) === 'active'" [class.pipeline-item--waiting]="getPipelineState(2) === 'waiting'">
             <div class="pipeline-item__indicator">
-              <div class="pipeline-item__dot pipeline-item__dot--active">
+              <div class="pipeline-item__dot" [class.pipeline-item__dot--done]="getPipelineState(2) === 'done'" [class.pipeline-item__dot--active]="getPipelineState(2) === 'active'" [class.pipeline-item__dot--waiting]="getPipelineState(2) === 'waiting'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                   <line x1="8" y1="21" x2="16" y2="21"/>
                   <line x1="12" y1="17" x2="12" y2="21"/>
                 </svg>
               </div>
-              <div class="pipeline-item__line"></div>
+              <div class="pipeline-item__line" [class.pipeline-item__line--done]="getPipelineState(2) === 'done' || getPipelineState(2) === 'active'"></div>
             </div>
-            <div class="pipeline-item__content pipeline-item__content--active">
+            <div class="pipeline-item__content" [class.pipeline-item__content--active]="getPipelineState(2) === 'active'">
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <div class="d-flex align-items-center gap-2">
                   <h4 class="mb-0">Triage Agent - تحديد أولوية الحالة</h4>
@@ -71,21 +71,19 @@
               <p class="text-secondary mb-3">
                 يتم تحليل التقارير الطبية لتصنيف الاستعجال (Critical / Standard).
               </p>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar-fill" style="width: 75%"></div>
-              </div>
+              
             </div>
           </div>
 
           <!-- Medical Validator -->
-          <div class="pipeline-item pipeline-item--waiting">
+          <div class="pipeline-item" [class.pipeline-item--done]="getPipelineState(3) === 'done'" [class.pipeline-item--active]="getPipelineState(3) === 'active'" [class.pipeline-item--waiting]="getPipelineState(3) === 'waiting'">
             <div class="pipeline-item__indicator">
-              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+              <div class="pipeline-item__dot" [class.pipeline-item__dot--done]="getPipelineState(3) === 'done'" [class.pipeline-item__dot--active]="getPipelineState(3) === 'active'" [class.pipeline-item__dot--waiting]="getPipelineState(3) === 'waiting'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
               </div>
-              <div class="pipeline-item__line"></div>
+              <div class="pipeline-item__line" [class.pipeline-item__line--done]="getPipelineState(3) === 'done' || getPipelineState(3) === 'active'"></div>
             </div>
             <div class="pipeline-item__content">
               <h4 class="mb-1">Medical Validator Agent - فلترة المتبرعين</h4>
@@ -96,16 +94,16 @@
           </div>
 
           <!-- Geo Matching -->
-          <div class="pipeline-item pipeline-item--waiting">
+          <div class="pipeline-item" [class.pipeline-item--done]="getPipelineState(4) === 'done'" [class.pipeline-item--active]="getPipelineState(4) === 'active'" [class.pipeline-item--waiting]="getPipelineState(4) === 'waiting'">
             <div class="pipeline-item__indicator">
-              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+              <div class="pipeline-item__dot" [class.pipeline-item__dot--done]="getPipelineState(4) === 'done'" [class.pipeline-item__dot--active]="getPipelineState(4) === 'active'" [class.pipeline-item__dot--waiting]="getPipelineState(4) === 'waiting'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"/>
                   <line x1="2" y1="12" x2="22" y2="12"/>
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                 </svg>
               </div>
-              <div class="pipeline-item__line"></div>
+              <div class="pipeline-item__line" [class.pipeline-item__line--done]="getPipelineState(4) === 'done' || getPipelineState(4) === 'active'"></div>
             </div>
             <div class="pipeline-item__content">
               <h4 class="mb-1">Geo-Matching Agent - ترتيب حسب المسافة</h4>
@@ -116,14 +114,14 @@
           </div>
 
           <!-- Notification Agent -->
-          <div class="pipeline-item pipeline-item--waiting">
+          <div class="pipeline-item" [class.pipeline-item--done]="getPipelineState(5) === 'done'" [class.pipeline-item--active]="getPipelineState(5) === 'active'" [class.pipeline-item--waiting]="getPipelineState(5) === 'waiting'">
             <div class="pipeline-item__indicator">
-              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+              <div class="pipeline-item__dot" [class.pipeline-item__dot--done]="getPipelineState(5) === 'done'" [class.pipeline-item__dot--active]="getPipelineState(5) === 'active'" [class.pipeline-item__dot--waiting]="getPipelineState(5) === 'waiting'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polygon points="5 3 19 12 5 21 5 3"/>
                 </svg>
               </div>
-              <div class="pipeline-item__line"></div>
+              <div class="pipeline-item__line" [class.pipeline-item__line--done]="getPipelineState(5) === 'done' || getPipelineState(5) === 'active'"></div>
             </div>
             <div class="pipeline-item__content">
               <h4 class="mb-1">Notification Agent - إرسال الإشعارات</h4>
@@ -134,20 +132,22 @@
           </div>
 
           <!-- Done -->
-          <div class="pipeline-item">
+          <div class="pipeline-item" [class.pipeline-item--done]="getPipelineState(6) === 'done'" [class.pipeline-item--active]="getPipelineState(6) === 'active'" [class.pipeline-item--waiting]="getPipelineState(6) === 'waiting'">
             <div class="pipeline-item__indicator">
-              <div class="pipeline-item__dot pipeline-item__dot--waiting">
+              <div class="pipeline-item__dot" [class.pipeline-item__dot--done]="getPipelineState(6) === 'done'" [class.pipeline-item__dot--active]="getPipelineState(6) === 'active'" [class.pipeline-item__dot--waiting]="getPipelineState(6) === 'waiting'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               </div>
+
             </div>
-            <div class="pipeline-item__content">
+            <div class="pipeline-item__content" [class.pipeline-item__content--active]="getPipelineState(6) === 'active'">
               <h4 class="mb-1">تفعيل الطلب بنجاح</h4>
               <p class="text-secondary mb-0">
                 المرحلة النهائية لنشر الطلب في الشبكة العامة.
               </p>
             </div>
+            
           </div>
 
         </div>
