@@ -5,9 +5,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Application.Features.BloodRequests.Commands.CompleteDonation;
-public sealed class CompleteDonationHandler: IRequestHandler<CompleteDonationCommand, bool>
-{
 
+public sealed class CompleteDonationHandler : IRequestHandler<CompleteDonationCommand, bool>
+{
     private readonly IApplicationDbContext _dbContext;
 
     public CompleteDonationHandler(IApplicationDbContext dbContext)
@@ -15,12 +15,12 @@ public sealed class CompleteDonationHandler: IRequestHandler<CompleteDonationCom
         _dbContext = dbContext;
     }
 
-    public async Task<bool> Handle( CompleteDonationCommand request,CancellationToken cancellationToken)
+    public async Task<bool> Handle(CompleteDonationCommand request, CancellationToken cancellationToken)
     {
-
         var bloodRequest =
             await _dbContext.BloodRequests
             .Include(x => x.Hospital)
+            .Include(x => x.Acceptances)
             .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId, cancellationToken);
 
         if (bloodRequest is null)
@@ -29,55 +29,66 @@ public sealed class CompleteDonationHandler: IRequestHandler<CompleteDonationCom
         if (bloodRequest.Status != RequestStatus.Accepted)
             return false;
 
-        var acceptance =
-            await _dbContext.BloodRequestAcceptances
-            .FirstOrDefaultAsync(x =>x.BloodRequestId == request.BloodRequestId &&
-                x.DonorId == request.DonorId &&
-                x.Status == AcceptanceStatus.Accepted,
-                cancellationToken);
-
-        if (acceptance is null)
-            return false;
-
+        // مين المخوّل يقفل الطلب: موظف المستشفى (لو الطلب جاي عن طريق مستشفى مسجلة)
+        // أو صاحب الطلب نفسه (لو الطلب جاي عن طريق OCR بدون مستشفى).
         if (bloodRequest.HospitalId.HasValue)
         {
-
-            var hospital =await _dbContext.Hospitals
-                .FirstOrDefaultAsync( x => x.Id == bloodRequest.HospitalId,
-                    cancellationToken);
+            var hospital = await _dbContext.Hospitals
+                .FirstOrDefaultAsync(x => x.Id == bloodRequest.HospitalId, cancellationToken);
 
             if (hospital is null)
                 return false;
 
-
             if (hospital.UserId != request.CompletedByUserId)
                 throw new UnauthorizedAccessException();
         }
-
         else
         {
-            if (bloodRequest.CreatedByUserId
-                != request.CompletedByUserId)
+            if (bloodRequest.CreatedByUserId != request.CompletedByUserId)
                 throw new UnauthorizedAccessException();
         }
 
+        // كل المتبرعين اللي قبلوا الطلب ده (Accepted) ولسه ماتأكدوش
+        var acceptedDonors = bloodRequest.Acceptances
+            .Where(x => x.Status == AcceptanceStatus.Accepted)
+            .ToList();
 
-        var donationHistory = new DonationHistory
+        if (acceptedDonors.Count == 0)
+            return false;
+
+        var donorIds = acceptedDonors.Select(x => x.DonorId).ToList();
+
+        var donors = await _dbContext.Users
+            .Where(x => donorIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        var donationDate = DateTime.UtcNow;
+        var hospitalName = bloodRequest.Hospital?.Name ?? bloodRequest.CustomHospitalName ?? "Unknown";
+
+        foreach (var acceptance in acceptedDonors)
         {
-            Id = Guid.NewGuid(),
-            DonorId = request.DonorId,
-            PatientId = bloodRequest.CreatedByUserId,
-            BloodRequestId = bloodRequest.Id,
-            HospitalName =bloodRequest.Hospital?.Name?? bloodRequest.CustomHospitalName?? "Unknown",
-            DonationDate = DateTime.UtcNow,
-            Notes = request.Notes
-        };
+            var donationHistory = new DonationHistory
+            {
+                Id = Guid.NewGuid(),
+                DonorId = acceptance.DonorId,
+                PatientId = bloodRequest.CreatedByUserId,
+                BloodRequestId = bloodRequest.Id,
+                HospitalName = hospitalName,
+                DonationDate = donationDate
+            };
 
+            await _dbContext.DonationHistories.AddAsync(donationHistory, cancellationToken);
 
+            acceptance.Status = AcceptanceStatus.Completed;
 
-        await _dbContext.DonationHistories.AddAsync( donationHistory, cancellationToken);
+            var donor = donors.FirstOrDefault(x => x.Id == acceptance.DonorId);
+            if (donor is not null)
+            {
+                donor.LastDonationDate = donationDate;
+            }
+        }
 
-        bloodRequest.Status =RequestStatus.Completed;
+        bloodRequest.Status = RequestStatus.Completed;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

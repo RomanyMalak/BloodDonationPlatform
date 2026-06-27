@@ -36,6 +36,12 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
         bool hospitalCanApprove = false;
         if (request.HospitalId.HasValue)
         {
+            var hospitalExists = await _dbContext.Hospitals
+                .AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
+
+            if (!hospitalExists)
+                throw new NotFoundException("Hospital not found.");
+
             hospitalCanApprove = await _dbContext.Hospitals
                 .AnyAsync(h =>
                     h.Id == request.HospitalId.Value &&
@@ -43,8 +49,14 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
                     cancellationToken);
         }
 
-        string savedDbPath = await _fileService.UploadFileAsync(
-            request.MedicalDocumentUrl, "MedicalDocuments", cancellationToken);
+        string? savedDbPath = null;
+        if (request.MedicalDocumentUrl != null)
+        {
+            savedDbPath = await _fileService.UploadFileAsync(
+                request.MedicalDocumentUrl,
+                "MedicalDocuments",
+                cancellationToken);
+        }
 
         var bloodRequest = new BloodRequest
         {
@@ -68,21 +80,10 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
             CreatedAt = DateTime.UtcNow
         };
 
-        if (request.HospitalId.HasValue)
-        {
-            var hospitalExists = await _dbContext.Hospitals
-                .AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
-
-            if (!hospitalExists)
-            {
-                throw new NotFoundException("Hospital not found.");
-            }
-        }
-
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if (!hospitalCanApprove)
+        if (!hospitalCanApprove && request.MedicalDocumentUrl != null)
         {
             await _ocrQueue.EnqueueAsync(bloodRequest.Id, cancellationToken);
         }
