@@ -1,6 +1,7 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewChecked, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatbotService } from '../../../core/services/chatbot.service'; 
 
 interface Message {
   from: 'bot' | 'user';
@@ -18,6 +19,8 @@ export class Chatbot implements AfterViewChecked {
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
+  private chatbotService = inject(ChatbotService);
+
   isOpen = false;
   showTooltip = false;
   isTyping = false;
@@ -31,35 +34,40 @@ export class Chatbot implements AfterViewChecked {
 
   sendQuick(text: string) {
     this.addMessage('user', text);
-    this.simulateBotReply(text);
+    this.callBotApi(text);
   }
 
   sendMessage() {
     if (!this.userMessage.trim()) return;
-    this.addMessage('user', this.userMessage);
-    this.simulateBotReply(this.userMessage);
+    const msg = this.userMessage;
+    this.addMessage('user', msg);
     this.userMessage = '';
+    this.callBotApi(msg);
   }
 
   addMessage(from: 'bot' | 'user', text: string) {
     this.messages.push({ from, text });
   }
 
-  simulateBotReply(userText: string) {
-    this.isTyping = true;
-    setTimeout(() => {
-      this.isTyping = false;
-      const reply = this.getBotReply(userText);
-      this.addMessage('bot', reply);
-    }, 1500);
-  }
+  
 
-  getBotReply(text: string): string {
-    if (text.includes('تبرع')) return 'رائع! يمكنك التبرع بالدم من خلال الضغط على "طلبات التبرع" واختيار أقرب مستشفى لك.';
-    if (text.includes('عاجل')) return 'حالة عاجلة؟ اضغط على "إنشاء طلب جديد" وسيقوم نظامنا بإيجاد أقرب متبرع فوراً!';
-    if (text.includes('بنك دم')) return 'يمكنك البحث عن أقرب بنك دم من خلال قسم "المراكز الصحية" في القائمة الرئيسية.';
-    if (text.includes('دعم')) return 'يمكنك التواصل مع فريق الدعم على البريد: support@bloodhub.sa أو الاتصال على 920XXXXXX.';
-    return 'شكراً على تواصلك! كيف يمكنني مساعدتك بشكل أفضل؟';
+  callBotApi(userText: string) {
+    this.isTyping = true;
+
+    this.chatbotService.sendMessage(userText).subscribe({
+      next: (res) => {
+        this.isTyping = false;
+        if (res.success) {
+          this.addMessage('bot', res.answer);
+        } else {
+          this.addMessage('bot', 'حدث خطأ، حاولي مرة أخرى.');
+        }
+      },
+      error: () => {
+        this.isTyping = false;
+        this.addMessage('bot', 'تعذر الاتصال بالخادم، حاولي لاحقاً.');
+      }
+    });
   }
 
   ngAfterViewChecked() {

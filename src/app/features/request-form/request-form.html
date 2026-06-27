@@ -172,6 +172,35 @@
                 <small class="form-hint" *ngIf="form.contactPhone && !validateContactPhone()">الصيغة الصحيحة: 01012345678</small>
               </div>
             </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">المحافظة</label>
+                <div class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <select class="form-select" [(ngModel)]="form.government" name="government" (ngModelChange)="onGovernorateChange()">
+                    <option value="" disabled selected>اختر المحافظة</option>
+                    <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">المدينة</label>
+                <div class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <select class="form-select" [(ngModel)]="form.city" name="city" [disabled]="!form.government">
+                    <option value="" disabled selected>اختر المدينة</option>
+                    <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             <div class="row g-3 mb-3" *ngIf="form.hospitalId === 'other'">
               <div class="col-12">
                 <label class="form-label">اسم المستشفى الأخرى</label>

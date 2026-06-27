@@ -48,29 +48,39 @@ export class DashboardHospital implements OnInit {
     });
   }
 
-  approveRequest(id: string) {
-    this.hospitalService.approveBloodRequest(id).subscribe({
-      next: () => this.loadData(),
-      error: (err) => console.error('approve error:', err)
-    });
-  }
+ approveRequest(id: string) {
+  this.pendingRequests = this.pendingRequests.filter(r => r.id !== id);
+
+  this.hospitalService.approveBloodRequest(id).subscribe({
+    next: () => this.loadData(), 
+    error: (err) => {
+      console.error('approve error:', err);
+      this.loadData(); 
+    }
+  });
+}
 
   openRejectModal(id: string) {
     this.selectedRequestId = id;
     this.showRejectModal = true;
   }
 
-  confirmReject() {
-    this.hospitalService.rejectBloodRequest(this.selectedRequestId, this.rejectReason).subscribe({
-      next: () => {
-        this.loadData();
-        this.showRejectModal = false;
-        this.rejectReason = '';
-        this.selectedRequestId = '';
-      },
-      error: (err) => console.error('reject error:', err)
-    });
-  }
+ confirmReject() {
+  const id = this.selectedRequestId;
+
+  this.pendingRequests = this.pendingRequests.filter(r => r.id !== id);
+  this.showRejectModal = false;
+  this.rejectReason = '';
+  this.selectedRequestId = '';
+
+  this.hospitalService.rejectBloodRequest(id, this.rejectReason).subscribe({
+    next: () => this.loadData(),
+    error: (err) => {
+      console.error('reject error:', err);
+      this.loadData();
+    }
+  });
+}
 
   closeRejectModal() {
     this.showRejectModal = false;
