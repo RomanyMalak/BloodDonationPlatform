@@ -16,13 +16,13 @@ namespace BloodDonation.API.Controllers;
 public class DonorsController : ControllerBase
 {
     private readonly IDonorService _donorService;
-    private readonly IDonorMatchingService donorMatchingService;
+    private readonly IDonorMatchingService _donorMatchingService;
     private readonly IMediator _mediator;
 
     public DonorsController(IDonorService donorService , IDonorMatchingService donorMatchingService, IMediator mediator)
     {
         _donorService = donorService;
-        this.donorMatchingService = donorMatchingService;
+        _donorMatchingService = donorMatchingService;
         _mediator = mediator;
     }
 
@@ -66,14 +66,10 @@ public class DonorsController : ControllerBase
     }
     // GET /api/donors/eligible?bloodType=A+
     [AllowAnonymous]
-    [HttpGet("eligible")]
-    public async Task<IActionResult> GetEligibleDonors([FromQuery] BloodType bloodType)
-    {
-        var donors = await _donorService.GetEligibleDonorsAsync(bloodType);
-        return Ok(donors);
-    }
-    [AllowAnonymous]
-    [HttpGet("available")]
+   
+   
+   
+    //[HttpGet("available")]
     //public async Task<IActionResult> GetAvailableDonors()
     //{
     //    var donors = await _donorService.GetAvailableDonorsAsync();
@@ -86,6 +82,21 @@ public class DonorsController : ControllerBase
             new GetAvailableBloodTypesQuery(requestId));
 
         return Ok(result);
+    }
+
+    [HttpGet("{bloodRequestId}/matched-donors/count")]
+    public async Task<IActionResult> GetMatchedDonorsCount(
+    Guid bloodRequestId,
+    CancellationToken cancellationToken)
+    {
+        var count = await _donorMatchingService.GetMatchedDonorsCountAsync(
+            bloodRequestId,
+            cancellationToken);
+
+        return Ok(new
+        {
+            matchedDonorsCount = count
+        });
     }
 
     private Guid? GetCurrentUserId()

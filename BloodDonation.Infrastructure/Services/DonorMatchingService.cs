@@ -20,29 +20,39 @@ public sealed class DonorMatchingService : IDonorMatchingService
         _medicalValidatorAgent = medicalValidatorAgent;
     }
 
+    private async Task<(BloodRequest BloodRequest, List<User> NearbyDonors)>
+    GetEligibleNearbyDonorsAsync(
+        Guid bloodRequestId,
+        CancellationToken cancellationToken)
+    {
+        var bloodRequest = await _context.BloodRequests
+            .FirstOrDefaultAsync(x => x.Id == bloodRequestId, cancellationToken);
+
+        if (bloodRequest is null)
+            throw new Exception("Blood request not found");
+
+        var nearbyDonors = await _donorQueryService.GetNearbyAvailableDonorsAsync(
+            bloodRequest,
+            cancellationToken);
+
+        var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
+
+        nearbyDonors = nearbyDonors
+            .Where(d =>
+                d.LastDonationDate == null ||
+                d.LastDonationDate < ninetyDaysAgo)
+            .ToList();
+
+        return (bloodRequest, nearbyDonors);
+    }
     public async Task<AvailableBloodTypesResponse> GetAvailableBloodTypesAsync(
          Guid bloodRequestId,
          CancellationToken cancellationToken)
     {
-        var bloodRequest = await _context.BloodRequests
-            .FirstOrDefaultAsync(
-                x => x.Id == bloodRequestId,
-                cancellationToken);
-        if (bloodRequest is null)
-            throw new Exception("Blood request not found");
-
-        var nearbyDonors =
-          await _donorQueryService.GetNearbyAvailableDonorsAsync(
-        bloodRequest,
-        cancellationToken);
-        
-
-        var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
-        nearbyDonors = nearbyDonors
-            .Where(donor => 
-            donor.LastDonationDate == null ||
-            donor.LastDonationDate < ninetyDaysAgo)
-            .ToList();
+        var (bloodRequest, nearbyDonors) =
+     await GetEligibleNearbyDonorsAsync(
+         bloodRequestId,
+         cancellationToken);
 
         return new AvailableBloodTypesResponse
         {
@@ -57,30 +67,49 @@ public sealed class DonorMatchingService : IDonorMatchingService
 
     public async Task<List<AvailableDonorDto>> GetMatchedDonorsAsync(Guid bloodRequestId, CancellationToken cancellationToken)
     {
-        var bloodRequest = await _context.BloodRequests
-            .FirstOrDefaultAsync(
-                x => x.Id == bloodRequestId,
-                cancellationToken);
-        if (bloodRequest is null)
-            throw new Exception("Blood request not found");
-        var nearbyDonors = await _donorQueryService.GetNearbyAvailableDonorsAsync(
-            bloodRequest,
-            cancellationToken);
-        var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
-        nearbyDonors = nearbyDonors
-            .Where(donor =>
-            donor.LastDonationDate == null ||
-            donor.LastDonationDate < ninetyDaysAgo)
-            .ToList();
+
+
+
+        var (bloodRequest, nearbyDonors) =
+    await GetEligibleNearbyDonorsAsync(
+        bloodRequestId,
+        cancellationToken);
+
         var availableBloodTypes = nearbyDonors
             .Select(x => x.BloodType!.Value.ToString())
             .Distinct()
             .ToList();
+
         var compatibleBloodTypes =
-    await _medicalValidatorAgent.GetCompatibleBloodTypesAsync(
-        bloodRequest.RequiredBloodType.ToString(),
-        availableBloodTypes,
-        cancellationToken);
+            await _medicalValidatorAgent.GetCompatibleBloodTypesAsync(
+                bloodRequest.RequiredBloodType.ToString(),
+                availableBloodTypes,
+                cancellationToken);
+
+    //    var bloodRequest = await _context.BloodRequests
+    //        .FirstOrDefaultAsync(
+    //            x => x.Id == bloodRequestId,
+    //            cancellationToken);
+    //    if (bloodRequest is null)
+    //        throw new Exception("Blood request not found");
+    //    var nearbyDonors = await _donorQueryService.GetNearbyAvailableDonorsAsync(
+    //        bloodRequest,
+    //        cancellationToken);
+    //    var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
+    //    nearbyDonors = nearbyDonors
+    //        .Where(donor =>
+    //        donor.LastDonationDate == null ||
+    //        donor.LastDonationDate < ninetyDaysAgo)
+    //        .ToList();
+    //    var availableBloodTypes = nearbyDonors
+    //        .Select(x => x.BloodType!.Value.ToString())
+    //        .Distinct()
+    //        .ToList();
+    //    var compatibleBloodTypes =
+    //await _medicalValidatorAgent.GetCompatibleBloodTypesAsync(
+    //    bloodRequest.RequiredBloodType.ToString(),
+    //    availableBloodTypes,
+    //    cancellationToken);
 
         var matchedDonors = nearbyDonors
     .Where(x =>
@@ -95,5 +124,15 @@ public sealed class DonorMatchingService : IDonorMatchingService
     .ToList();
         return matchedDonors;
 
+    }
+    public async Task<int> GetMatchedDonorsCountAsync(
+    Guid bloodRequestId,
+    CancellationToken cancellationToken)
+    {
+        var matchedDonors = await GetMatchedDonorsAsync(
+            bloodRequestId,
+            cancellationToken);
+
+        return matchedDonors.Count;
     }
 }
