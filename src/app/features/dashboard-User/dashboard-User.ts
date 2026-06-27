@@ -6,6 +6,7 @@ import { BloodRequestService } from '../../core/services/blood-request.service';
 import { DonorService } from '../../core/services/donor.service';
 import { BloodRequestSummaryDto, DonorNearbyRequestDto } from '../../shared/models/blood-request.model';
 import { StorageService } from '../../core/services/storage.service';
+import { NotificationDto , NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-dashboard-user',
@@ -19,6 +20,8 @@ export class DashboardUser implements OnInit {
   private bloodRequestService = inject(BloodRequestService);
   private donorService = inject(DonorService);
   private storage = inject(StorageService);
+  private notificationService = inject(NotificationService);
+  notifications : NotificationDto [] = [];
   fullName = '';
 
   isAvailable = true;
@@ -44,6 +47,8 @@ export class DashboardUser implements OnInit {
       next: (res) => {
         this.availableRequests = res;
         this.isLoading = false;
+        this.notificationService.loadNotifications();
+        this.notificationService.notifications$.subscribe( n => this.notifications = n)
       },
       error: (err) => {
         console.error('available error:', err);
@@ -52,12 +57,18 @@ export class DashboardUser implements OnInit {
     });
 
     this.bloodRequestService.getMyRequests().subscribe({
-  next: (res) => {
-    console.log('my requests:', res);
-    this.myRequests = res;
-  },
-  error: (err) => console.error('my requests error:', err)
-}); 
+      next: (res) => {
+        console.log('my requests:', res);
+        this.myRequests = res;
+        const latestRequest = res[res.length - 1] ?? null;
+        if (latestRequest) {
+          this.storage.set('lastRequest', JSON.stringify(latestRequest));
+        } else {
+          this.storage.remove('lastRequest');
+        }
+      },
+      error: (err) => console.error('my requests error:', err)
+    }); 
     this.donorService.getNearbyRequests().subscribe({
       next: (res) => {
         console.log('nearby:', res);

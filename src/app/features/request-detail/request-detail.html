@@ -296,6 +296,12 @@
               <div class="pipeline__label">في انتظار القبول</div>
               <div class="pipeline__time">جاري التحديث...</div>
             </div>
+            <div class="pipeline__step pipeline__step--view-more">
+              <a [routerLink]="['/AiPipeline']" [queryParams]="{ id: request.id || request.requestId }" 
+                class="pipeline__view-more-link">
+                عرض المزيد
+              </a>
+            </div>
           </div>
 
           <!-- AI Insight -->

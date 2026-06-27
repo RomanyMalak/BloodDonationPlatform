@@ -16,7 +16,7 @@
       </h1>
 
       <p class="hero-desc mx-auto">
-        نعمل في "نبض الأمل" على تحويل البيانات الطبية إلى قرارات فورية
+        نعمل في "وَريد" على تحويل البيانات الطبية إلى قرارات فورية
         تنقذ الأرواح، عبر دمج أنظمة الذكاء الاصطناعي مع البنية التحتية
         الصحية لضمان استجابة أكثر كفاءة وشفافية.
       </p>
@@ -91,7 +91,7 @@
 
             <p>
               نسعى لتمكين قطاع الرعاية الصحية بحلول رقمية ذكية تجعل من
-              نبض الأمل المرجع الأول للتبرع بالدم عربياً، عبر ربط الجهات
+              وَريد المرجع الأول للتبرع بالدم عربياً، عبر ربط الجهات
               المختلفة وتحقيق أعلى درجات الكفاءة في منظومة التبرع.
             </p>
 
@@ -217,7 +217,7 @@
           مخزونك الدموي عبر تقنياتنا المتطورة.
         </p>
 
-        <button class="btn btn-light mt-3">
+        <button class="btn btn-light mt-3" type="button" (click)="openPartnershipForm()">
           طلب شراكة تقنية
         </button>
 
@@ -228,3 +228,41 @@
   </section>
 
 </section>
+
+<div class="partnership-overlay" *ngIf="showPartnershipForm" (click)="closePartnershipForm()">
+  <div class="partnership-card" (click)="$event.stopPropagation()">
+    <div class="partnership-card__header">
+      <div>
+        <h4 class="partnership-card__title">طلب شراكة تقنية</h4>
+        <p class="partnership-card__subtitle">أرسل بياناتك وسنتواصل معك لتوضيح تفاصيل الشراكة.</p>
+      </div>
+      <span class="partnership-card__tag">مؤسسة صحية</span>
+    </div>
+
+    <form (ngSubmit)="submitPartnershipForm()" #partnershipFormRef="ngForm">
+      <div class="mb-3">
+        <label class="form-label">الاسم</label>
+        <input type="text" class="form-control" [(ngModel)]="partnershipForm.name" name="name" required placeholder="الاسم الكامل" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">البريد الإلكتروني</label>
+        <input type="email" class="form-control" [(ngModel)]="partnershipForm.email" name="email" required placeholder="example@mail.com" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">رقم الهاتف</label>
+        <input type="tel" class="form-control" [(ngModel)]="partnershipForm.phone" name="phone" required placeholder="05XXXXXXXX" />
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="!partnershipForm.name || !partnershipForm.email || !partnershipForm.phone">
+          إرسال الطلب
+        </button>
+        <button type="button" class="btn btn-outline flex-grow-1" (click)="closePartnershipForm()">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

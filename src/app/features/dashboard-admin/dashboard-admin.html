@@ -1,7 +1,6 @@
 <div class="page-layout">
-  <app-sidebar></app-sidebar>
 
-  <main class="page-content">
+  <main class="page-content dashboard-admin-page">
 
     <!-- ===== HEADER ===== -->
     <div class="d-flex align-items-center justify-content-between mb-4">
@@ -10,6 +9,71 @@
         <p class="text-secondary mb-0">إدارة المستخدمين وطلبات المستشفيات.</p>
       </div>
     </div>
+
+    <!-- ===== STATS ===== -->
+<div class="stats-grid mb-4">
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--blue">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </div>
+    <p class="stat-card__label">إجمالي الطلبات</p>
+    <p class="stat-card__value">{{ stats?.totalRequests ?? 0 }}</p>
+    <p class="stat-card__sub">كل الطلبات المسجلة</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--green">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </div>
+    <p class="stat-card__label">الطلبات النشطة</p>
+    <p class="stat-card__value">{{ stats?.activeRequests ?? 0 }}</p>
+    <p class="stat-card__sub">قيد التنفيذ حالياً</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--purple">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </div>
+    <p class="stat-card__label">إجمالي المتبرعين</p>
+    <p class="stat-card__value">{{ stats?.totalDonors ?? 0 }}</p>
+    <p class="stat-card__sub">متبرع مسجل</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--red">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M12 8v4l3 3"/>
+      </svg>
+    </div>
+    <p class="stat-card__label">إجمالي التبرعات</p>
+    <p class="stat-card__value">{{ stats?.totalDonations ?? 0 }}</p>
+    <p class="stat-card__sub">عملية تبرع مكتملة</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--orange">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+    </div>
+    <p class="stat-card__label">الإشعارات المرسلة</p>
+    <p class="stat-card__value">{{ stats?.totalNotificationsSent ?? 0 }}</p>
+    <p class="stat-card__sub">إشعار تم إرساله</p>
+  </div>
+
+</div>
 
     <!-- ===== TABS ===== -->
     <div class="admin-tabs mb-4">
@@ -179,66 +243,86 @@
     <!-- ===== TAB: ADMINS ===== -->
     <div *ngIf="activeTab === 'admins'">
 
-      <!-- Add Admin Form -->
-      <div class="card add-admin-card mb-4">
-        <h4 class="mb-4">إضافة أدمن جديد</h4>
-        <form (ngSubmit)="addAdmin()" #adminForm="ngForm">
-          <div class="row g-3">
+    <!-- Add Admin Form -->
+<div class="card add-admin-card mb-4">
+  <h4 class="mb-4">إضافة أدمن جديد</h4>
+  <div *ngIf="adminMessage" class="admin-message admin-message--success">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span>{{ adminMessage }}</span>
+  </div>
+  <div *ngIf="adminErrorMessage" class="admin-message admin-message--error">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12" y2="16"/>
+    </svg>
+    <span>{{ adminErrorMessage }}</span>
+  </div>
+  <form (ngSubmit)="addAdmin()" #adminForm="ngForm">
+    <div class="add-admin-row">
 
-            <div class="col-md-4">
-              <label class="form-label">الاسم الكامل</label>
-              <div class="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                <input type="text" class="form-control" placeholder="اسم الأدمن"
-                  [(ngModel)]="newAdmin.name" name="name" required/>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">البريد الإلكتروني</label>
-              <div class="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
-                <input type="email" class="form-control" placeholder="admin@nabdel.com"
-                  [(ngModel)]="newAdmin.email" name="email" required/>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">الصلاحية</label>
-              <div class="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                <select class="form-select" [(ngModel)]="newAdmin.role" name="role" required>
-                  <option value="" disabled selected>اختر الصلاحية</option>
-                  <option value="super_admin">Super Admin</option>
-                  <option value="moderator">Moderator</option>
-                  <option value="support">Support</option>
-                </select>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="d-flex justify-content-end mt-3">
-            <button type="submit" class="btn btn-primary" [disabled]="adminForm.invalid">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              إضافة الأدمن
-            </button>
-          </div>
-
-        </form>
+      <div class="input-col">
+        <label class="form-label">الاسم الكامل</label>
+        <div class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input type="text" class="form-control" placeholder="اسم الأدمن"
+            [(ngModel)]="newAdmin.fullName" name="fullName" required/>
+        </div>
       </div>
 
+      <div class="input-col">
+        <label class="form-label">البريد الإلكتروني</label>
+        <div class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input type="email" class="form-control" placeholder="admin@nabdel.com"
+            [(ngModel)]="newAdmin.email" name="email" required/>
+        </div>
+      </div>
+
+      <div class="input-col">
+        <label class="form-label">رقم الهاتف</label>
+        <div class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          <input type="tel" class="form-control" placeholder="01xxxxxxxxx"
+            [(ngModel)]="newAdmin.phone" name="phone" required/>
+        </div>
+      </div>
+
+      <div class="input-col">
+        <label class="form-label">كلمة المرور</label>
+        <div class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input type="password" class="form-control" placeholder="••••••••"
+            [(ngModel)]="newAdmin.password" name="password" required/>
+        </div>
+      </div>
+
+      <div class="add-admin-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="adminForm.invalid">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          إضافة الأدمن
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
       <!-- Admins List -->
       <div class="card p-0 overflow-hidden">
         <table class="admin-table w-100">

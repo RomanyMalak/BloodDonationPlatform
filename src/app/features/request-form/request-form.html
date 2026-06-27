@@ -82,6 +82,18 @@
             <p class="text-secondary mb-0">يرجى إدخال بيانات المريض والمستشفى لضمان سرعة الوصول للمتبرعين.</p>
           </div>
 
+          <!-- Error Badge -->
+          <div *ngIf="errorMessage" class="mb-4">
+            <div class="error-badge-container">
+              <span class="badge badge-danger error-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 4px;">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {{ errorMessage }}
+              </span>
+            </div>
+          </div>
+
           <form (ngSubmit)="onSubmit()" #requestForm="ngForm">
 
             <!-- اسم المريض + العمر -->
@@ -144,6 +156,7 @@
     <select class="form-select" name="hospitalId" required (change)="onHospitalSelect($event)">
       <option value="" disabled selected>اختر المستشفى</option>
       <option *ngFor="let h of activeHospitals" [value]="h.id">{{ h.name }}</option>
+      <option value="other">أخرى</option>
     </select>
   </div>
 </div>
@@ -156,6 +169,14 @@
                   <input type="tel" class="form-control" placeholder="01XXXXXXXXX"
                     [(ngModel)]="form.contactPhone" name="contactPhone" required/>
                 </div>
+                <small class="form-hint" *ngIf="form.contactPhone && !validateContactPhone()">الصيغة الصحيحة: 01012345678</small>
+              </div>
+            </div>
+            <div class="row g-3 mb-3" *ngIf="form.hospitalId === 'other'">
+              <div class="col-12">
+                <label class="form-label">اسم المستشفى الأخرى</label>
+                <input type="text" class="form-control" placeholder="اكتب اسم المستشفى"
+                  [(ngModel)]="form.customHospitalName" name="customHospitalName" required />
               </div>
             </div>
 
@@ -174,7 +195,7 @@
             </div>
 
             <!-- رفع المستند الطبي -->
-            <div class="mb-3">
+            <div class="mb-3" *ngIf="form.hospitalId === 'other'">
               <label class="form-label">المستند الطبي</label>
               <div class="upload-area" (click)="fileInput.click()">
                 <input #fileInput type="file" accept=".pdf,.jpg,.png"
@@ -201,7 +222,7 @@
 
             <!-- Submit -->
             <button type="submit" class="btn btn-submit w-100"
-              [disabled]="requestForm.invalid || !medicalFile || isLoading">
+              [disabled]="requestForm.invalid || (form.hospitalId === 'other' && !medicalFile) || isLoading">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>

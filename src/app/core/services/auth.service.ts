@@ -29,6 +29,13 @@ saveSession(res: LoginResponse) {
   this.storage.set('role', res.role);
 }
 
+logout(): void {
+  this.storage.remove('token');
+  this.storage.remove('userId');
+  this.storage.remove('fullName');
+  this.storage.remove('role');
+}
+
   getRole(): string | null {
     return this.storage.get('role');
   }

@@ -30,6 +30,7 @@ export class RequestFormComponent implements OnInit {
   selectedBloodType = '';
   activeHospitals: any[] = [];
 
+  errorMessage: string = '';
   urgencyMap: Record<string, number> = { normal: 0, urgent: 1, critical: 2 };
   bloodTypeMap: Record<string, number> = {
     '+A': 0, '-A': 1, '+B': 2, '-B': 3,
@@ -53,16 +54,23 @@ ngOnInit() {
   this.route.queryParams.subscribe(params => {
     this.requireLogin = params['requireLogin'] === 'true';
   });
+
   if (isPlatformBrowser(this.platformId)) {
     const token = localStorage.getItem('token');
+    this.isLoggedIn = !!token;
+
+    if (!this.isLoggedIn) {
+      this.requireLogin = true;
+    }
+
     if (token) {
       this.form.patientName = localStorage.getItem('fullName') || '';
       this.form.contactPhone = localStorage.getItem('phone') || '';
     }
   }
+
   this.loadHospitals();
 }
-
   loadHospitals() {
   this.hospitalService.getActive().subscribe({
     next: (res) => this.activeHospitals = res,
@@ -73,15 +81,29 @@ ngOnInit() {
 
 onHospitalSelect(event: Event) {
   const select = event.target as HTMLSelectElement;
-  const selected = this.activeHospitals.find(h => h.id === select.value);
+  const selectedValue = select.value;
+  this.form.hospitalId = selectedValue;
+
+  if (selectedValue === 'other') {
+    this.form.customHospitalName = '';
+    return;
+  }
+
+  const selected = this.activeHospitals.find(h => h.id === selectedValue);
   if (selected) {
     this.form.hospitalId = selected.id;
     this.form.customHospitalName = '';
   }
-} 
+}
   setUrgency(val: string) {
     this.selectedUrgency = val;
     this.form.urgency = this.urgencyMap[val];
+  }
+
+  validateContactPhone(): boolean {
+    // Phone validation: Egyptian phone number format (11 digits starting with 01)
+    const phoneRegex = /^01[0-9]{9}$/;
+    return phoneRegex.test(this.form.contactPhone);
   }
 
   onFileSelect(event: Event) {
@@ -93,7 +115,22 @@ onHospitalSelect(event: Event) {
   }
 
   onSubmit() {
-    if (!this.medicalFile) return;
+    if (this.form.hospitalId === 'other' && !this.medicalFile) return;
+
+    if (!this.isLoggedIn) {
+      this.requireLogin = true;
+      return;
+    }
+
+    // Validate contactPhone
+    if (!this.form.contactPhone || !this.validateContactPhone()) {
+      this.errorMessage = 'رقم الهاتف غير صحيح. الرجاء إدخال رقم صحيح (مثال: 01012345678)';
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 5000);
+      return;
+    }
+
     this.isLoading = true;
 
     const payload = {
@@ -101,22 +138,16 @@ onHospitalSelect(event: Event) {
       patientAge: this.form.patientAge ?? undefined,
       requiredBloodType: this.bloodTypeMap[this.selectedBloodType],
       urgency: this.form.urgency,
-       hospitalId: this.form.hospitalId || undefined,
-      customHospitalName: this.form.customHospitalName,
+       hospitalId: this.form.hospitalId === 'other' ? undefined : this.form.hospitalId || undefined,
+      customHospitalName: this.form.hospitalId === 'other' ? this.form.customHospitalName : undefined,
       latitude: 0,
       longitude: 0,
-      medicalDocumentUrl: this.medicalFile,
+      medicalDocumentUrl: this.form.hospitalId === 'other' ? this.medicalFile : undefined,
       notes: this.form.notes,
       contactPhone: this.form.contactPhone,
       unitsNeeded: this.form.unitsNeeded,
       expiresAt: this.form.expiresAt || undefined
     };
-
-    if (!this.isLoggedIn) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/request-form' } });
-      this.isLoading = false;
-      return;
-    }
 
     this.bloodRequestService.create(payload).subscribe({
       next: (res) => {
@@ -134,6 +165,12 @@ onHospitalSelect(event: Event) {
       error: (err) => {
         console.error('خطأ:', err);
         this.isLoading = false;
+        // Display backend error message
+        this.errorMessage = err.error?.message || err.message || 'حدث خطأ أثناء إنشاء الطلب';
+        // Clear error after 5 seconds
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 5000);
       }
     });
   }

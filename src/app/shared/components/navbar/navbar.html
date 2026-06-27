@@ -3,10 +3,10 @@
     <div class="d-flex align-items-center justify-content-between">
 
       <!-- Logo -->
-      <a class="navbar-logo" routerLink="/">نبض الأمل</a>
+      <a class="navbar-logo" routerLink="/">وَريد</a>
 
       <!-- Links -->
-      <ul class="d-flex align-items-center gap-4 mb-0">
+      <ul class="navbar-links d-flex align-items-center gap-4 mb-0">
         <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a></li>
         <li><a routerLink="/donation-requests" routerLinkActive="active">طلبات التبرع</a></li>
         <li><a routerLink="/Blood-Banks" routerLinkActive="active"> بنوك الدم</a></li>
@@ -16,13 +16,40 @@
       <!-- Actions -->
       <div class="d-flex align-items-center gap-3">
 
-        <button class="icon-btn position-relative" aria-label="الإشعارات">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span class="notif-dot">3</span>
-        </button>
+    <!-- Notification Bell -->
+<div class="navbar-notification" *ngIf="isLoggedIn()">
+  <button class="notification-btn" (click)="toggleNotifications()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+    <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+  </button>
+
+  <!-- Dropdown -->
+  <div class="notification-dropdown" *ngIf="showNotifications">
+    <div class="notification-dropdown__header">
+      <span>الإشعارات</span>
+      <button class="btn-link" (click)="markAllRead()" *ngIf="unreadCount > 0">
+        تعليم الكل كمقروء
+      </button>
+    </div>
+
+    <div class="notification-dropdown__body">
+      <div class="notification-item" *ngFor="let n of notifications"
+           [class.notification-item--unread]="!n.isRead"
+           (click)="markRead(n.id)">
+        <div class="notification-item__title">{{ n.title }}</div>
+        <div class="notification-item__msg">{{ n.message }}</div>
+        <div class="notification-item__time">{{ n.createdAt | date:'dd/MM HH:mm' }}</div>
+      </div>
+
+      <div class="notification-item text-center text-secondary" *ngIf="notifications.length === 0">
+        لا توجد إشعارات
+      </div>
+    </div>
+  </div>
+</div>
 
         <button class="icon-btn" aria-label="الإعدادات">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -31,10 +58,15 @@
           </svg>
         </button>
 
-       <a *ngIf="isLoggedIn()" [routerLink]="getProfileRoute()" class="navbar-avatar">
-  <img [src]="userAvatar || 'assets/images/avatar.png'" alt="الملف الشخصي" />
-</a>
-        <a routerLink="/login" class="nav-login-btn btn btn-primary btn-sm">
+        <a *ngIf="isLoggedIn()" [routerLink]="getProfileRoute()" class="navbar-avatar">
+          <img src="../../../../assets/images/user-image.jpg" alt="الملف الشخصي" />
+        </a>
+
+        <button *ngIf="isLoggedIn()" type="button" class="nav-logout-btn btn btn-outline btn-sm" (click)="logout()">
+          تسجيل الخروج
+        </button>
+
+        <a *ngIf="!isLoggedIn()" routerLink="/login" class="nav-login-btn btn btn-primary btn-sm">
           <i class="bi bi-box-arrow-in-right"></i>
           تسجيل الدخول
         </a>

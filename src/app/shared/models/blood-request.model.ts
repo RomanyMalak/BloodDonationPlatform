@@ -38,7 +38,7 @@ export interface CreateBloodRequestDto {
   customHospitalName?: string;
   latitude: number;
   longitude: number;
-  medicalDocumentUrl?: File;
+  medicalDocumentUrl?: File | null;
   notes?: string;
   contactPhone?: string;
   unitsNeeded: number;

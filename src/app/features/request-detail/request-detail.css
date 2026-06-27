@@ -189,15 +189,17 @@
   gap: 0;
   overflow-x: auto;
   padding-bottom: 8px;
+  white-space: nowrap;
 }
 
 .pipeline__step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
+  flex: 0 0 auto;
   position: relative;
-  min-width: 80px;
+  min-width: 110px;
+  padding: 0 10px;
 }
 
 .pipeline__dot {
@@ -253,6 +255,32 @@
   color: var(--text-muted);
   text-align: center;
   margin-top: 2px;
+}
+
+/* ===== PIPELINE ARROW ===== */
+.pipeline__arrow-section {
+  display: none;
+}
+
+.pipeline__step--view-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.pipeline__view-more-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.pipeline__view-more-link:hover {
+  color: #b91c1c;
+  text-decoration: underline;
 }
 
 /* ===== AI INSIGHT ===== */

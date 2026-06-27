@@ -14,8 +14,7 @@
         </span>
       </div>
       <div class="d-flex gap-2">
-        <button class="btn btn-ghost btn-sm">عرض تقرير التحليل المبدئي</button>
-        <button class="btn btn-outline btn-sm">إلغاء الطلب</button>
+        <button class="btn btn-outline btn-sm" (click)="cancelRequest()">إلغاء الطلب</button>
       </div>
     </div>
 
@@ -199,36 +198,61 @@
         <div class="card">
           <h4 class="mb-3">تفاصيل الطلب</h4>
 
-          <div class="d-flex flex-column gap-3">
+          <div *ngIf="isLoading" class="text-secondary">جاري تحميل بيانات الطلب...</div>
+          <div *ngIf="errorMessage" class="text-danger">{{ errorMessage }}</div>
+
+          <div *ngIf="request" class="d-flex flex-column gap-3">
+
+            <div class="detail-row">
+              <span class="detail-row__label">اسم المريض</span>
+              <span class="detail-row__val">{{ request.patientName }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">عمر المريض</span>
+              <span class="detail-row__val">{{ request.patientAge || '-' }} سنة</span>
+            </div>
 
             <div class="detail-row">
               <span class="detail-row__label">فصيلة الدم</span>
-              <span class="blood-badge" style="width:36px;height:36px;font-size:0.75rem;">-0</span>
+              <span class="blood-badge" style="width:36px;height:36px;font-size:0.75rem;">
+                {{ request.requiredBloodType || '-' }}
+              </span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-row__label">درجة الاستعجال</span>
+              <span class="detail-row__val">{{ request.urgency || '-' }}</span>
             </div>
 
             <div class="detail-row">
               <span class="detail-row__label">عدد الوحدات</span>
-              <span class="detail-row__val">4 وحدات</span>
+              <span class="detail-row__val">{{ request.unitsNeeded }} وحدة</span>
             </div>
 
             <div class="detail-row">
               <span class="detail-row__label">المستشفى</span>
-              <span class="detail-row__val">مجمع الشفاء الطبي</span>
+              <span class="detail-row__val">{{ request.hospitalName || 'غير محدد' }}</span>
             </div>
 
-          </div>
+            <div class="detail-row">
+              <span class="detail-row__label">رقم الهاتف</span>
+              <span class="detail-row__val">{{ request.contactPhone || '-' }}</span>
+            </div>
 
-          <!-- Hospital Image -->
-          <div class="hospital-img-wrap mt-3">
-            <img src="assets/images/hospital.png" alt="المستشفى"/>
-          </div>
+            
+
+
+            
+
+          </div>         
 
         </div>
 
         <!-- Action Buttons -->
         <div class="d-flex flex-column gap-2">
-          <button class="btn btn-primary btn-lg">عرض تقرير التحليل المبدئي</button>
-          <button class="btn btn-ghost btn-lg">إلغاء الطلب</button>
+
+          <button class="btn btn-ghost btn-lg" (click)="cancelRequest()">إلغاء الطلب</button>
         </div>
 
       </div>
