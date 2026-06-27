@@ -36,6 +36,12 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
         bool hospitalCanApprove = false;
         if (request.HospitalId.HasValue)
         {
+            var hospitalExists = await _dbContext.Hospitals
+                .AnyAsync(h => h.Id == request.HospitalId.Value, cancellationToken);
+
+            if (!hospitalExists)
+                throw new NotFoundException("Hospital not found.");
+
             hospitalCanApprove = await _dbContext.Hospitals
                 .AnyAsync(h =>
                     h.Id == request.HospitalId.Value &&
@@ -73,20 +79,6 @@ public sealed class CreateBloodRequestHandler : IRequestHandler<CreateBloodReque
             CreatedByUserId = request.CreatedByUserId,
             CreatedAt = DateTime.UtcNow
         };
-
-        if (request.HospitalId.HasValue)
-        {
-            var hospital = await _dbContext.Hospitals
-                .FirstOrDefaultAsync(
-                    h => h.Id == request.HospitalId.Value,
-                    cancellationToken);
-
-            if (hospital is null)
-                throw new NotFoundException("Hospital not found.");
-
-            if (!hospital.IsActive)
-                throw new NotFoundException("Hospital is not active.");
-        }
 
         await _dbContext.BloodRequests.AddAsync(bloodRequest, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);

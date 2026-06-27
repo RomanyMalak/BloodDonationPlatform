@@ -4,6 +4,7 @@ public enum AcceptanceStatus
 {
     Pending,
     Accepted,
+    Completed,
     Rejected,
     Cancelled
 }
