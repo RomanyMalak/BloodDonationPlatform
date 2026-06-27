@@ -3,8 +3,8 @@ using BloodDonation.Application.Features.BloodRequests.Commands.AcceptBloodReque
 using BloodDonation.Application.Features.BloodRequests.Commands.CancelBloodRequest;
 using BloodDonation.Application.Features.BloodRequests.Commands.CompleteDonation;
 using BloodDonation.Application.Features.BloodRequests.Commands.CreateBloodRequest;
-using BloodDonation.Application.Features.BloodRequests.Queries.GetAvailableBloodRequests;
 using BloodDonation.Application.Features.BloodRequests.Queries.GetBloodRequestDetails;
+using BloodDonation.Application.Features.BloodRequests.Queries.GetCompletedBloodRequests;
 using BloodDonation.Application.Features.BloodRequests.Queries.GetMyBloodRequests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -56,10 +56,10 @@ public class BloodRequestsController : ControllerBase
 
     // GET api/blood-requests
     [HttpGet]
-    public async Task<IActionResult> GetAvailable(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCompleted(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
-            new GetAvailableBloodRequestsQuery(),
+            new GetCompletedBloodRequestsQuery(),
             cancellationToken);
 
         return Ok(result);
@@ -90,7 +90,7 @@ public class BloodRequestsController : ControllerBase
 
         try
         {
-            await _mediator.Send(
+            var result = await _mediator.Send(
                 new AcceptBloodRequestCommand
                 {
                     BloodRequestId = id,
@@ -98,7 +98,9 @@ public class BloodRequestsController : ControllerBase
                 },
                 cancellationToken);
 
-            return Ok("Request accepted successfully.");
+            return result
+                ? Ok("Request accepted successfully.")
+                : BadRequest("Unable to accept this request.");
         }
         catch (Exception)
         {
@@ -131,7 +133,6 @@ public class BloodRequestsController : ControllerBase
     [HttpPost("{id:guid}/completeBloodRequest")]
     public async Task<IActionResult> Complete(
         Guid id,
-        [FromBody] CompleteDonationRequest body,
         CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -141,9 +142,7 @@ public class BloodRequestsController : ControllerBase
             new CompleteDonationCommand
             {
                 BloodRequestId = id,
-                DonorId = body.DonorId,
-                CompletedByUserId = Guid.Parse(userId),
-                Notes = body.Notes
+                CompletedByUserId = Guid.Parse(userId)
             },
             cancellationToken);
 

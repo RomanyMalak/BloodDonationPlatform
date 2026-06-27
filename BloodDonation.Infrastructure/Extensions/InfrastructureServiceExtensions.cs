@@ -43,6 +43,9 @@ public static class InfrastructureServiceExtensions
         services.AddHttpClient<GeminiClient>();
         services.AddScoped<GeminiResponseParser>();
 
+        services.AddHttpClient<IChatAssistantService, ChatAssistantService>();
+     
+
         return services;
     }
 }

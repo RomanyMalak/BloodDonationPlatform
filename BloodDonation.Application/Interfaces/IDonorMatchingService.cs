@@ -11,4 +11,7 @@ public interface IDonorMatchingService
     Task<List<AvailableDonorDto>> GetMatchedDonorsAsync(
         Guid bloodRequestId,
         CancellationToken cancellationToken);
+    public Task<int> GetMatchedDonorsCountAsync(
+    Guid bloodRequestId,
+    CancellationToken cancellationToken);
 }

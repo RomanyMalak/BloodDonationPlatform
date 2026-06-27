@@ -30,8 +30,7 @@ public sealed class CancelBloodRequestCommandHandler
 
         if (bloodRequest.Status == RequestStatus.Matching ||
             bloodRequest.Status == RequestStatus.Accepted ||
-            bloodRequest.Status == RequestStatus.Completed ||
-            bloodRequest.Status == RequestStatus.Cancelled)
+            bloodRequest.Status == RequestStatus.Completed)
         {
             return false;
         }
