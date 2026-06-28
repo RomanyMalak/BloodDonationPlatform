@@ -119,7 +119,8 @@ public sealed class DonorMatchingService : IDonorMatchingService
     {
         Id = x.Id,
         FullName = x.FullName,
-        BloodType = x.BloodType!.Value.ToString()
+        BloodType = x.BloodType!.Value.ToString(),
+        Phone = x.Phone
     })
     .ToList();
         return matchedDonors;

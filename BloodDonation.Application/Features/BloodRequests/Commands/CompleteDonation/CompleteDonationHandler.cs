@@ -9,10 +9,14 @@ namespace BloodDonation.Application.Features.BloodRequests.Commands.CompleteDona
 public sealed class CompleteDonationHandler : IRequestHandler<CompleteDonationCommand, bool>
 {
     private readonly IApplicationDbContext _dbContext;
+    private readonly IWhatsAppService _whatsAppService;
 
-    public CompleteDonationHandler(IApplicationDbContext dbContext)
+    public CompleteDonationHandler(
+        IApplicationDbContext dbContext,
+        IWhatsAppService whatsAppService)
     {
         _dbContext = dbContext;
+        _whatsAppService = whatsAppService;
     }
 
     public async Task<bool> Handle(CompleteDonationCommand request, CancellationToken cancellationToken)
@@ -91,6 +95,25 @@ public sealed class CompleteDonationHandler : IRequestHandler<CompleteDonationCo
         bloodRequest.Status = RequestStatus.Completed;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        const string thankYouMessage = """
+            ❤️ Thank you for saving a life.
+
+            Your blood donation has been completed successfully.
+            """;
+
+        foreach (var donor in donors)
+        {
+            await _whatsAppService.SendAsync(
+                donor.Phone,
+                thankYouMessage,
+                cancellationToken);
+        }
+
+        await _whatsAppService.SendAsync(
+            bloodRequest.Hospital?.Hotline,
+            thankYouMessage,
+            cancellationToken);
 
         return true;
     }

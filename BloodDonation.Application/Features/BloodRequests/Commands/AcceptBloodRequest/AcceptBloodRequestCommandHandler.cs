@@ -15,13 +15,16 @@ public sealed class AcceptBloodRequestCommandHandler
 
     private readonly IApplicationDbContext _dbContext;
     private readonly INotificationService _notificationService;
+    private readonly IWhatsAppService _whatsAppService;
 
     public AcceptBloodRequestCommandHandler(
         IApplicationDbContext dbContext,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IWhatsAppService whatsAppService)
     {
         _dbContext = dbContext;
         _notificationService = notificationService;
+        _whatsAppService = whatsAppService;
     }
 
     public async Task<bool> Handle(
@@ -30,7 +33,9 @@ public sealed class AcceptBloodRequestCommandHandler
     {
         var bloodRequest =
             await _dbContext.BloodRequests
-            .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId, cancellationToken);
+            .Include(x => x.Acceptances)
+            .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId,cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId,cancellationToken);
 
         if (bloodRequest is null)
             throw new NotFoundException("Blood request not found.");
@@ -110,7 +115,9 @@ public sealed class AcceptBloodRequestCommandHandler
                 cancellationToken) + 1;
 
 
-        if (acceptedCount >= bloodRequest.UnitsNeeded)
+        var requestStatusChangedToAccepted = acceptedCount >= bloodRequest.UnitsNeeded;
+
+        if (requestStatusChangedToAccepted)
         {
             bloodRequest.Status = RequestStatus.Accepted;
         }
@@ -124,6 +131,34 @@ public sealed class AcceptBloodRequestCommandHandler
             bloodRequest.Id,
             "Acceptance",
             cancellationToken);
+
+        if (bloodRequest.Hospital is not null)
+        {
+            await _notificationService.CreateAsync(
+                bloodRequest.Hospital.UserId,
+                "Donor Accepted Blood Request",
+                "A donor has accepted a blood request assigned to your hospital.",
+                bloodRequest.Id,
+                "Acceptance",
+                cancellationToken);
+
+            await _whatsAppService.SendAsync(
+                bloodRequest.Hospital.Hotline,
+                "A donor has accepted a blood request. Please open the application to view the details.",
+                cancellationToken);
+        }
+
+        if (requestStatusChangedToAccepted)
+        {
+            await _whatsAppService.SendAsync(
+                donor.Phone,
+                """
+                ✅ Your blood donation request has been accepted by the hospital.
+
+                Please open the application to view the details.
+                """,
+                cancellationToken);
+        }
 
         return true;
     }

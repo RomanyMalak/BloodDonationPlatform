@@ -35,7 +35,8 @@ namespace BloodDonation.Infrastructure.Services
                 {
                     Id = x.Id,
                     FullName = x.FullName,
-                    BloodType = x.BloodType!.Value.ToString()
+                    BloodType = x.BloodType!.Value.ToString(),
+                    Phone = x.Phone
                 })
                 .ToListAsync(cancellationToken);
         }

@@ -1,4 +1,5 @@
-﻿using BloodDonation.Application.Interfaces;
+﻿using BloodDonation.API.Services;
+using BloodDonation.Application.Interfaces;
 using BloodDonation.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,27 @@ namespace BloodDonation.API.Controllers
         private readonly IDonorQueryService _donorQueryService;
         private readonly IDonorMatchingService _donorMatchingService;
 
-        public testController(IMedicalValidatorAgent medicalValidatorAgent, IDonorQueryService donorQueryService, IDonorMatchingService donorMatchingService)
+        public testController(IMedicalValidatorAgent medicalValidatorAgent, IDonorQueryService donorQueryService, IDonorMatchingService donorMatchingService , IWhatsAppService whatsApp)
         {
             _medicalValidatorAgent = medicalValidatorAgent;
             _donorQueryService = donorQueryService;
             _donorMatchingService = donorMatchingService;
+            _whatsApp = whatsApp;
+        }
+
+
+        private readonly IWhatsAppService _whatsApp;
+
+       
+
+        [HttpPost("send")]
+        public async Task<IActionResult> Send()
+        {
+            await _whatsApp.SendAsync(
+                "+201556772101",
+                "Hello from Blood Donation System ❤️");
+
+            return Ok();
         }
 
         [HttpGet]

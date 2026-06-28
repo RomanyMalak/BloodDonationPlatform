@@ -19,15 +19,18 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
         private readonly IApplicationDbContext _dbContext;
         private readonly INotificationService _notificationService;
        private readonly IDonorMatchingService _donorMatchingService;
+        private readonly IWhatsAppService _whatsAppService;
 
         public ApproveBloodRequestHandler(
             IApplicationDbContext dbContext,
             INotificationService notificationService,
-            IDonorMatchingService donorMatchingService)
+            IDonorMatchingService donorMatchingService,
+            IWhatsAppService whatsAppService)
         {
             _dbContext = dbContext;
             _notificationService = notificationService;
             _donorMatchingService = donorMatchingService;
+            _whatsAppService = whatsAppService;
         }
 
         public async Task<BloodRequestDetailsDto?> Handle(
@@ -91,6 +94,13 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
                     bloodRequest.Id,
                     "BloodRequest",
                     cancellationToken);
+
+                await _whatsAppService.SendAsync(
+                    donor.Phone,
+                    BuildBloodDonationAlertMessage(
+                        bloodRequest.RequiredBloodType.ToString(),
+                        bloodRequest.Hospital?.Name ?? bloodRequest.CustomHospitalName ?? "Unknown"),
+                    cancellationToken);
             }
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -105,6 +115,22 @@ namespace BloodDonation.Application.Features.Hospitals.Commands.ApproveBloodRequ
                 UnitsNeeded = bloodRequest.UnitsNeeded,
                 CreatedAt =bloodRequest.CreatedAt
             };
+        }
+
+        private static string BuildBloodDonationAlertMessage(string bloodType, string hospitalName)
+        {
+            return $"""
+                🩸 Blood Donation Alert
+
+                A nearby patient urgently needs blood.
+
+                Blood Type: {bloodType}
+                Hospital: {hospitalName}
+
+                Please open the application to respond.
+
+                Thank you for helping save lives ❤️
+                """;
         }
     }
 }

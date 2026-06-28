@@ -1,8 +1,8 @@
-﻿using BloodDonation.API.Middewares;
+using BloodDonation.API.Hubs;
+using BloodDonation.API.Middewares;
+using BloodDonation.API.Services;
 using BloodDonation.Application.Extensions;
 using BloodDonation.Application.Interfaces;
-using BloodDonation.API.Hubs;
-using BloodDonation.API.Services;
 using BloodDonation.Infrastructure.Extensions;
 using BloodDonation.Infrastructure.Persistence;
 using BloodDonation.Infrastructure.Services;
@@ -26,7 +26,6 @@ builder.Services.AddHttpClient<
     MedicalValidatorAgent>();
 
 builder.Services.AddControllers();
-
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<NotificationConnectionTracker>();

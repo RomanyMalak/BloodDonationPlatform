@@ -1,5 +1,6 @@
 ﻿using BloodDonation.Application.Interfaces;
 using BloodDonation.Application.Interfaces.Repositories;
+using BloodDonation.Infrastructure.Configurations;
 using BloodDonation.Infrastructure.Gemini;
 using BloodDonation.Infrastructure.Persistence;
 using BloodDonation.Infrastructure.Repositories;
@@ -37,6 +38,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IDonorMatchingService, DonorMatchingService>();
         services.AddScoped<IDonorQueryService, DonorQueryService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.Configure<TwilioSettings>(configuration.GetSection("Twilio"));
+        services.AddScoped<IWhatsAppService, WhatsAppService>();
         services.AddScoped<IOcrService, OcrService>();
         services.AddSingleton<IOcrVerificationQueue, OcrVerificationQueue>();
         services.AddHostedService<OcrBackgroundService>();

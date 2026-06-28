@@ -17,17 +17,20 @@ public sealed class VerifyBloodRequestDocumentHandler
     private readonly IOcrService _ocrService;
     private readonly INotificationService _notificationService;
     private readonly IDonorMatchingService _donorMatchingService;
+    private readonly IWhatsAppService _whatsAppService;
 
     public VerifyBloodRequestDocumentHandler(
         IApplicationDbContext dbContext,
         IOcrService ocrService,
         INotificationService notificationService,
-        IDonorMatchingService donorMatchingService)
+        IDonorMatchingService donorMatchingService,
+        IWhatsAppService whatsAppService)
     {
         _dbContext = dbContext;
         _ocrService = ocrService;
         _notificationService = notificationService;
         _donorMatchingService = donorMatchingService;
+        _whatsAppService = whatsAppService;
     }
 
 
@@ -107,6 +110,13 @@ public sealed class VerifyBloodRequestDocumentHandler
                     bloodRequest.Id,
                     "BloodRequest",
                     cancellationToken);
+
+                await _whatsAppService.SendAsync(
+                    donor.Phone,
+                    BuildBloodDonationAlertMessage(
+                        bloodRequest.RequiredBloodType.ToString(),
+                        bloodRequest.Hospital?.Name ?? bloodRequest.CustomHospitalName ?? "Unknown"),
+                    cancellationToken);
             }
 
         }
@@ -124,5 +134,21 @@ public sealed class VerifyBloodRequestDocumentHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return result;
+    }
+
+    private static string BuildBloodDonationAlertMessage(string bloodType, string hospitalName)
+    {
+        return $"""
+            🩸 Blood Donation Alert
+
+            A nearby patient urgently needs blood.
+
+            Blood Type: {bloodType}
+            Hospital: {hospitalName}
+
+            Please open the application to respond.
+
+            Thank you for helping save lives ❤️
+            """;
     }
 }
