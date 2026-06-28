@@ -1,90 +1,53 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgModule } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
-import {RouterLink} from '@angular/router';
-
-interface BloodRequest {
-  hospital: string;
-  city: string;
-  distance: string;
-  time: string;
-  bloodType: string;
-  status: string;
-  needed: string;
-  progress: number;
-  timeLeft: string;
-}
+import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { BloodRequestService } from '../../core/services/blood-request.service';
+import { BloodRequestSummaryDto } from '../../shared/models/blood-request.model';
 
 @Component({
   selector: 'app-donation-requests',
-  imports: [RouterLink ,FormsModule  , CommonModule],
+  imports: [RouterLink, FormsModule, CommonModule],
   templateUrl: './donation-requests.html',
   styleUrl: './donation-requests.css',
 })
+export class DonationRequests implements OnInit {
 
+  private bloodRequestService = inject(BloodRequestService);
 
-export class DonationRequests {
-  
-   selectedBloodType = '';
+  selectedBloodType = '';
   searchQuery = '';
-   
-    requests: BloodRequest[] = [
-    {
-      hospital: 'مستشفى المنيا العام',
-      city: 'المنيا، شارع سعد زغلول',
-      distance: '3.2 كم',
-      time: '15 دقيقة',
-      bloodType: '+O',
-      status: 'حالة حرجة',
-      needed: '5 متبرعين',
-      progress: 20,
-      timeLeft: 'منذ 15 دقيقة'
-    },
-    {
-      hospital: 'مستشفى مغاغة المركزي',
-      city: 'مغاغة، شارع الجمهورية',
-      distance: '5.1 كم',
-      time: '45 دقيقة',
-      bloodType: '+A',
-      status: 'عاجل',
-      needed: '3 متبرعين',
-      progress: 50,
-      timeLeft: 'منذ 45 دقيقة'
-    },
-    {
-      hospital: 'مستشفى دير مواس المركزي',
-      city: 'دير مواس، شارع المستشفى',
-      distance: '7.4 كم',
-      time: '1 ساعة',
-      bloodType: '+B',
-      status: 'طبيعي',
-      needed: '4 متبرعين',
-      progress: 70,
-      timeLeft: 'منذ ساعة'
-    },
-    {
-      hospital: 'مستشفى ملوي العام',
-      city: 'ملوي، شارع 26 يوليو',
-      distance: '6.8 كم',
-      time: '2 ساعة',
-      bloodType: '-AB',
-      status: 'حالة حرجة',
-      needed: '2 متبرعين',
-      progress: 10,
-      timeLeft: 'منذ ساعتين'
-    }
-  ];
+  isLoading = false;
 
+  requests: BloodRequestSummaryDto[] = [];
+  filteredRequests: BloodRequestSummaryDto[] = [];
 
-  filteredRequests: BloodRequest[] = [...this.requests];
+  ngOnInit() {
+    this.loadRequests();
+  }
+
+  loadRequests() {
+    this.isLoading = true;
+    this.bloodRequestService.getAvailable().subscribe({
+      next: (res) => {
+        this.requests = res;
+        this.filteredRequests = res;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('requests error:', err);
+        this.isLoading = false;
+      }
+    });
+  }
 
   filterRequests() {
     this.filteredRequests = this.requests.filter(req => {
       const matchBlood = this.selectedBloodType
-        ? req.bloodType === this.selectedBloodType
+        ? req.requiredBloodType === this.selectedBloodType
         : true;
       const matchSearch = this.searchQuery
-        ? req.hospital.includes(this.searchQuery) || req.city.includes(this.searchQuery)
+        ? req.patientName?.includes(this.searchQuery) || req.hospitalName?.includes(this.searchQuery)
         : true;
       return matchBlood && matchSearch;
     });
@@ -92,16 +55,22 @@ export class DonationRequests {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'حالة حرجة': return 'badge-danger';
-      case 'عاجل':       return 'badge-warning';
-      case 'طبيعي':      return 'badge-success';
-      default:           return 'badge-info';
+      case 'Critical': return 'badge-danger';
+      case 'Urgent':   return 'badge-warning';
+      case 'Normal':   return 'badge-success';
+      default:         return 'badge-info';
     }
   }
+
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      'Critical': 'حالة حرجة',
+      'Urgent': 'عاجل',
+      'Normal': 'طبيعي',
+      'Matching': 'جاري المطابقة',
+      'Completed': 'مكتمل',
+      'Cancelled': 'ملغي'
+    };
+    return labels[status] || status;
+  }
 }
-
-
-
-
-
-

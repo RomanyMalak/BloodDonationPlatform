@@ -324,50 +324,42 @@
   </form>
 </div>
       <!-- Admins List -->
-      <div class="card p-0 overflow-hidden">
-        <table class="admin-table w-100">
-          <thead>
-            <tr>
-              <th>الاسم</th>
-              <th>البريد</th>
-              <th>الصلاحية</th>
-              <th>تاريخ الإضافة</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- <tr *ngFor="let admin of admins">
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="table-icon table-icon--red">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  {{ admin.name }}
-                </div>
-              </td>
-              <td>{{ admin.email }}</td>
-              <td>
-                <span class="role-badge" [class.role-badge--super]="admin.role === 'super_admin'"
-                  [class.role-badge--mod]="admin.role === 'moderator'"
-                  [class.role-badge--support]="admin.role === 'support'">
-                  {{ getRoleLabel(admin.role) }}
-                </span>
-              </td>
-              <td>{{ admin.createdAt }}</td>
-              <td>
-                <button class="btn btn-ghost btn-sm text-danger"
-                  (click)="removeAdmin(admin.id)"
-                  [disabled]="admin.role === 'super_admin'">
-                  حذف
-                </button>
-              </td>
-            </tr> -->
-          </tbody>
-        </table>
-      </div>
+     <div class="card p-0 overflow-hidden">
+  <table class="admin-table w-100">
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>البريد</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let admin of admins">
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="table-icon table-icon--red">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            {{ admin.name }}
+          </div>
+        </td>
+        <td>{{ admin.email }}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm text-danger" (click)="removeAdmin(admin.id)">
+            حذف
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="admins.length === 0">
+        <td colspan="3" class="text-center text-secondary py-3">لا يوجد أدمنز</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
     </div>
 

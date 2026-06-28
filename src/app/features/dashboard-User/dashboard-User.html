@@ -3,6 +3,39 @@
 
   <main class="page-content">
 
+    <!-- Donate Modal -->
+<div class="modal-overlay" *ngIf="showDonateModal" (click)="closeDonateModal()">
+  <div class="donate-card" (click)="$event.stopPropagation()">
+    <h3>🩸 طلب تبرع بالدم</h3>
+
+    <div class="detail-row">
+      <span>المريض</span>
+      <span>{{ selectedRequest?.patientName }}</span>
+    </div>
+    <div class="detail-row">
+      <span>فصيلة الدم</span>
+      <span class="blood-badge">{{ selectedRequest?.requiredBloodType }}</span>
+    </div>
+    <div class="detail-row">
+      <span>المستشفى</span>
+      <span>{{ selectedRequest?.hospitalName || 'غير محدد' }}</span>
+    </div>
+    <div class="detail-row">
+      <span>درجة الاستعجال</span>
+      <span>{{ selectedRequest?.urgency }}</span>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+      <button class="btn btn-primary" (click)="confirmDonate()" [disabled]="selectedRequest?.status === 'Accepted'">تأكيد التبرع</button>
+      <button class="btn btn-outline" (click)="closeDonateModal()">لاحقاً</button>
+    </div>
+  </div>
+</div>
+
+    <div class="alert alert-success mx-3 mt-3" *ngIf="showSuccessAlert">
+      {{ successMessage }}
+    </div>
+
     <!-- ===== WELCOME ===== -->
     <div class="d-flex align-items-center justify-content-between mb-4">
       <div>

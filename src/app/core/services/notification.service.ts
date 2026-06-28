@@ -12,6 +12,7 @@ export interface NotificationDto {
   isRead: boolean;
   createdAt: string;
   bloodRequestId?: string;
+  donorId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,22 +26,18 @@ export class NotificationService {
   notifications$ = new BehaviorSubject<NotificationDto[]>([]);
   unreadCount$ = new BehaviorSubject<number>(0);
 
-  // جيب كل الإشعارات
   getMyNotifications() {
     return this.http.get<NotificationDto[]>(`${this.api}/my`);
   }
 
-  // علّم إشعار كمقروء
   markAsRead(id: string) {
     return this.http.put(`${this.api}/${id}/read`, {});
   }
 
-  // علّم كل الإشعارات كمقروءة
   markAllAsRead() {
     return this.http.put(`${this.api}/read-all`, {});
   }
 
-  // ابدأ الـ SignalR connection
   startConnection() {
     const token = this.storage.get('token');
     if (!token) return;
@@ -63,12 +60,10 @@ export class NotificationService {
       .catch(err => console.error('SignalR error:', err));
   }
 
-  // وقف الـ connection
   stopConnection() {
     this.hubConnection?.stop();
   }
 
-  // حمّل الإشعارات الأولية
   loadNotifications() {
     this.getMyNotifications().subscribe({
       next: (res) => {

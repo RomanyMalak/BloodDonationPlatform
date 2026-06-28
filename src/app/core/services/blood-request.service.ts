@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { BloodRequestSummaryDto, BloodRequestDetailsDto, CreateBloodRequestDto } from '../../shared/models/blood-request.model';
+import { text } from 'stream/consumers';
 
 @Injectable({ providedIn: 'root' })
 export class BloodRequestService {
@@ -11,6 +12,10 @@ export class BloodRequestService {
 
   getAvailable() {
     return this.http.get<BloodRequestSummaryDto[]>(`${this.api}`);
+  }
+
+  getAll() {
+    return this.http.get<BloodRequestSummaryDto[]>(`${this.api}/all`); // ← غيري الـ endpoint لو مختلف
   }
 
   getById(id: string) {
@@ -27,7 +32,7 @@ export class BloodRequestService {
     if (data.customHospitalName) formData.append('CustomHospitalName', data.customHospitalName);
     formData.append('Latitude', data.latitude.toString());
     formData.append('Longitude', data.longitude.toString());
-    formData.append('MedicalDocumentUrl', data.medicalDocumentUrl? data.medicalDocumentUrl : '');
+    formData.append('MedicalDocumentUrl', data.medicalDocumentUrl ? data.medicalDocumentUrl : '');
     if (data.notes) formData.append('Notes', data.notes);
     if (data.contactPhone) formData.append('ContactPhone', data.contactPhone);
     formData.append('UnitsNeeded', data.unitsNeeded.toString());
@@ -37,18 +42,18 @@ export class BloodRequestService {
   }
 
   accept(id: string) {
-    return this.http.post(`${this.api}/${id}/acceptBloodRequest`, {});
+    return this.http.post(`${this.api}/${id}/acceptBloodRequest`, {} , { responseType : 'text'});
   }
 
   cancel(id: string) {
-  return this.http.put(`${this.api}/${id}/cancelBloodRequest`, {}, { responseType: 'text' });
-}
+    return this.http.put(`${this.api}/${id}/cancelBloodRequest`, {}, { responseType: 'text' });
+  }
 
   complete(id: string, donorId: string, notes?: string) {
     return this.http.post(`${this.api}/${id}/completeBloodRequest`, { donorId, notes });
   }
 
   getMyRequests() {
-  return this.http.get<BloodRequestSummaryDto[]>(`${this.api}/my-requests`);
-}
+    return this.http.get<BloodRequestSummaryDto[]>(`${this.api}/my-requests`);
+  }
 }

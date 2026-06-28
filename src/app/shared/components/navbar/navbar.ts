@@ -16,6 +16,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+  selectedDonor: any = null;
+ showDonorCard = false;
 
   isScrolled = false;
   userAvatar = 'assets/images/avatar.png';
@@ -83,4 +85,29 @@ export class NavbarComponent implements OnInit, OnDestroy {
       error: (err) => console.error(err)
     });
   }
+
+onNotificationClick(notification: NotificationDto) {
+  this.markRead(notification.id);
+
+  //  if (notification.title?.includes('Donor Accepted Your Request') && notification.donorId) {
+  //   this.donorService.getById(notification.donorId).subscribe({
+  //     next: (res) => {
+  //       this.selectedDonor = res;
+  //       this.showDonorCard = true;
+  //       this.showNotifications = false;
+  //     }
+  //   });
+  //  } 
+
+  if (notification.title?.includes('طلب تبرع') && notification.bloodRequestId) {
+    this.showNotifications = false;
+    
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate(['/dashboard-User'], {
+        queryParams: { donateRequestId: notification.bloodRequestId }
+      });
+    });
+  }
+}
+
 }

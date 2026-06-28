@@ -250,20 +250,37 @@
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                         <circle cx="12" cy="10" r="3" />
                       </svg>
-                      <input type="text" class="form-control" placeholder="مثال: المنيا" [(ngModel)]="form.government"
-                        name="government" required />
+                      <select class="form-select" [(ngModel)]="form.government" name="government" (ngModelChange)="onGovernorateChange()" required>
+                        <option value="">اختر المحافظة</option>
+                        <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}</option>
+                      </select>
                     </div>
                   </div>
                   <div class="col-6">
-                    <label class="form-label">العنوان التفصيلي</label>
+                    <label class="form-label">المدينة</label>
                     <div class="input-icon">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                         <circle cx="12" cy="10" r="3" />
                       </svg>
-                      <input type="text" class="form-control" placeholder="مثال: شارع النيل، بجوار المحكمة"
-                        [(ngModel)]="form.addressDetail" name="addressDetail" required />
+                      <select class="form-select" [(ngModel)]="form.city" name="city" [disabled]="!form.government" required>
+                        <option value="">اختر المدينة</option>
+                        <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                      </select>
                     </div>
+                  </div>
+                </div>
+
+                <!-- العنوان التفصيلي -->
+                <div class="mb-3">
+                  <label class="form-label">العنوان التفصيلي</label>
+                  <div class="input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <input type="text" class="form-control" placeholder="مثال: شارع النيل، بجوار المحكمة"
+                      [(ngModel)]="form.addressDetail" name="addressDetail" required />
                   </div>
                 </div>
               

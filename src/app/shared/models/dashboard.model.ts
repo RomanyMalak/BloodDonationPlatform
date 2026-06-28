@@ -12,3 +12,9 @@ export interface DashboardStats {
   totalDonations: number;
   totalNotificationsSent: number;
 }
+
+export interface AdminDto {
+  id: string;
+  name: string;
+  email: string;
+}

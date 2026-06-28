@@ -36,13 +36,14 @@
     </div>
 
     <div class="notification-dropdown__body">
-      <div class="notification-item" *ngFor="let n of notifications"
-           [class.notification-item--unread]="!n.isRead"
-           (click)="markRead(n.id)">
-        <div class="notification-item__title">{{ n.title }}</div>
-        <div class="notification-item__msg">{{ n.message }}</div>
-        <div class="notification-item__time">{{ n.createdAt | date:'dd/MM HH:mm' }}</div>
-      </div>
+    <div class="notification-item" *ngFor="let n of notifications"
+     [class.notification-item--unread]="!n.isRead"
+     [style.cursor]="n.title?.includes('طلب تبرع') ? 'pointer' : 'default'"
+     (click)="onNotificationClick(n)">
+  <div class="notification-item__title">{{ n.title }}</div>
+  <div class="notification-item__msg">{{ n.message }}</div>
+  <div class="notification-item__time">{{ n.createdAt | date:'dd/MM HH:mm' }}</div>
+</div>
 
       <div class="notification-item text-center text-secondary" *ngIf="notifications.length === 0">
         لا توجد إشعارات

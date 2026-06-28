@@ -4,6 +4,7 @@ export interface BloodRequestSummaryDto {
   requiredBloodType: string;
   urgency: string;
   status: string;
+  bloodType?: string;
   hospitalName?: string;
   unitsNeeded: number;
   contactPhone?: string;

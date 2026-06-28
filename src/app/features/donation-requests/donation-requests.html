@@ -1,4 +1,3 @@
-
 <main class="requests-page">
   <div class="container-fluid px-4 py-4">
     <div class="row g-4">
@@ -16,31 +15,23 @@
           </div>
 
           <div class="d-flex flex-column gap-3">
-
-            <div class="urgent-item">
-              <div class="d-flex align-items-center gap-3">
-                <div class="urgent-item__blood">+O</div>
-                <div class="flex-1">
-                  <div class="urgent-item__hospital">مستشفى المنيا العام</div>
-                  <div class="urgent-item__desc">يحتاج متبرعين فوراً لحالة طارئة</div>
-                  <div class="urgent-item__time">منذ دقيقتين</div>
+            <ng-container *ngFor="let req of requests | slice:0:2">
+              <div class="urgent-item" *ngIf="req.urgency === 'Critical' || req.urgency === 'Urgent'">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="urgent-item__blood">{{ req.requiredBloodType }}</div>
+                  <div class="flex-1">
+                    <div class="urgent-item__hospital">{{ req.hospitalName || 'غير محدد' }}</div>
+                    <div class="urgent-item__desc">يحتاج {{ req.unitsNeeded }} وحدات فوراً</div>
+                    <div class="urgent-item__time">{{ req.createdAt | date:'dd/MM HH:mm' }}</div>
+                  </div>
                 </div>
               </div>
+              <div class="divider"></div>
+            </ng-container>
+
+            <div *ngIf="requests.length === 0" class="text-secondary text-center">
+              لا توجد طلبات عاجلة
             </div>
-
-            <div class="divider"></div>
-
-            <div class="urgent-item">
-              <div class="d-flex align-items-center gap-3">
-                <div class="urgent-item__blood">-A</div>
-                <div class="flex-1">
-                  <div class="urgent-item__hospital">مستشفى مغاغة المركزي</div>
-                  <div class="urgent-item__desc">نقص حاد في المخزون الصحية</div>
-                  <div class="urgent-item__time">منذ 10 دقائق</div>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -57,7 +48,7 @@
             <h4 class="mb-0">كيف تتبرع؟</h4>
           </div>
           <p class="text-secondary mb-3" style="font-size:0.875rem; line-height:1.8;">
-            عملية التبرع بسيطة وتأخذ حوالي 10 دقائق. أحد المتبرعين أقرب إليك، اختر الطلب المناسب وتوجه للمستشفى المذكور.
+            عملية التبرع بسيطة وتأخذ حوالي 10 دقائق. اختر الطلب المناسب وتوجه للمستشفى المذكور.
           </p>
           <a routerLink="/how-to-donate" class="how-card__link">
             شروط التبرع ←
@@ -65,6 +56,7 @@
         </div>
 
       </div>
+
       <!-- ===== MAIN CONTENT ===== -->
       <div class="col-lg-8">
 
@@ -76,14 +68,14 @@
               <label class="form-label">فصيلة الدم</label>
               <select class="form-select" [(ngModel)]="selectedBloodType" (change)="filterRequests()">
                 <option value="">الكل</option>
-                <option value="+A">A+</option>
-                <option value="-A">A-</option>
-                <option value="+B">B+</option>
-                <option value="-B">B-</option>
-                <option value="+AB">AB+</option>
-                <option value="-AB">AB-</option>
-                <option value="+O">O+</option>
-                <option value="-O">O-</option>
+                <option value="APositive">A+</option>
+                <option value="ANegative">A-</option>
+                <option value="BPositive">B+</option>
+                <option value="BNegative">B-</option>
+                <option value="ABPositive">AB+</option>
+                <option value="ABNegative">AB-</option>
+                <option value="OPositive">O+</option>
+                <option value="ONegative">O-</option>
               </select>
             </div>
 
@@ -94,12 +86,11 @@
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text" class="form-control"
-                  placeholder="ابحث باسم المستشفى أو المدينة..."
+                  placeholder="ابحث باسم المستشفى أو المريض..."
                   [(ngModel)]="searchQuery"
                   (input)="filterRequests()"/>
               </div>
             </div>
-
 
           </div>
         </div>
@@ -110,13 +101,18 @@
           <span class="results-count">تم العثور على {{ filteredRequests.length }} طلب تبرع</span>
         </div>
 
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="text-center text-secondary py-4">
+          جاري تحميل الطلبات...
+        </div>
+
         <!-- Table -->
-        <div class="card p-0 overflow-hidden">
+        <div class="card p-0 overflow-hidden" *ngIf="!isLoading">
           <div class="table-responsive">
             <table class="req-table w-100">
               <thead>
                 <tr>
-                  <th>المستشفى والمدينة</th>
+                  <th>المستشفى والمريض</th>
                   <th>الفصيلة</th>
                   <th>الحالة</th>
                   <th>الاحتياج</th>
@@ -127,40 +123,44 @@
                 <tr *ngFor="let req of filteredRequests">
                   <td>
                     <div class="hospital-info">
-                      <div class="hospital-info__name">{{ req.hospital }}</div>
+                      <div class="hospital-info__name">{{ req.hospitalName || 'غير محدد' }}</div>
                       <div class="hospital-info__location">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                           <circle cx="12" cy="10" r="3"/>
                         </svg>
-                        {{ req.city }} · {{ req.distance }}
+                        {{ req.patientName }}
                       </div>
                       <div class="hospital-info__time">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <circle cx="12" cy="12" r="10"/>
                           <polyline points="12 6 12 12 16 14"/>
                         </svg>
-                        منذ {{ req.time }}
+                        {{ req.createdAt | date:'dd/MM/yyyy HH:mm' }}
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span class="blood-badge">{{ req.bloodType }}</span>
+                    <span class="blood-badge">{{ req.requiredBloodType }}</span>
                   </td>
                   <td>
-                    <span class="badge" [ngClass]="getStatusClass(req.status)">{{ req.status }}</span>
+                    <span class="badge" [ngClass]="getStatusClass(req.status)">
+                      {{ getStatusLabel(req.status) }}
+                    </span>
                   </td>
                   <td>
                     <div class="need-info">
-                      <div class="need-info__label">من {{ req.needed }}</div>
-                      <div class="need-bar">
-                        <div class="need-bar__fill" [style.width]="req.progress + '%'"></div>
-                      </div>
-                      <div class="need-info__sub">{{ req.timeLeft }}</div>
+                      <div class="need-info__label">{{ req.unitsNeeded }} وحدة</div>
                     </div>
                   </td>
                   <td>
                     <button class="btn btn-primary btn-sm">تبرع الآن</button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="filteredRequests.length === 0">
+                  <td colspan="5" class="text-center text-secondary py-4">
+                    لا توجد طلبات مطابقة
                   </td>
                 </tr>
               </tbody>
@@ -168,12 +168,8 @@
           </div>
         </div>
 
-
       </div>
-
-      
 
     </div>
   </div>
 </main>
-

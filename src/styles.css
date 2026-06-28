@@ -134,13 +134,15 @@ h4 { font-size: 1rem;    font-weight: 600; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  width: auto;
   height: 44px;
+  padding: 0 16px;
   border-radius: var(--radius-md);
   background: var(--primary);
   color: white;
   font-weight: 700;
   font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 /* ===== LAYOUT ===== */

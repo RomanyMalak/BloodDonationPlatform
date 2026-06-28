@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { HospitalService } from '../../core/services/hospital.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { DashboardStats, CreateAdminRequest } from '../../shared/models/dashboard.model';
+import { AdminDto } from '../../../app/shared/models/dashboard.model';
 
 @Component({
   selector: 'app-dashboard-admin',
@@ -31,6 +32,7 @@ export class DashboardAdmin implements OnInit {
   pendingHospitals: HospitalDto[] = [];
   approvedHospitals: HospitalDto[] = [];
   rejectedHospitals: HospitalDto[] = [];
+  admins: AdminDto[] = []; 
 
   stats: DashboardStats | null = null;
   aiLogs: any[] = [];
@@ -41,33 +43,31 @@ export class DashboardAdmin implements OnInit {
     this.loadAll();
     this.loadStats();
     this.loadAiLogs();
+    this.loadAdmins();
+  }
+
+  loadAdmins() {
+    this.dashboardService.getAdmins().subscribe({
+      next: (res) => this.admins = res,
+      error: (err) => console.error('admins error:', err)
+    });
   }
 
   loadAll() {
     this.isLoading = true;
 
     this.hospitalService.getWaiting().subscribe({
-      next: (res) => {
-        console.log('waiting:', res);
-        this.pendingHospitals = res;
-      },
+      next: (res) => this.pendingHospitals = res,
       error: (err) => console.error('waiting error:', err)
     });
 
     this.hospitalService.getActive().subscribe({
-      next: (res) => {
-        console.log('active:', res);
-        this.approvedHospitals = res;
-        this.isLoading = false;
-      },
+      next: (res) => { this.approvedHospitals = res; this.isLoading = false; },
       error: (err) => { console.error('active error:', err); this.isLoading = false; }
     });
 
     this.hospitalService.getRejected().subscribe({
-      next: (res) => {
-        console.log('rejected:', res);
-        this.rejectedHospitals = res;
-      },
+      next: (res) => this.rejectedHospitals = res,
       error: (err) => console.error('rejected error:', err)
     });
   }
@@ -92,10 +92,10 @@ export class DashboardAdmin implements OnInit {
 
     this.dashboardService.createAdmin(this.newAdmin).subscribe({
       next: (res) => {
-        console.log('admin created:', res);
         this.adminMessage = res;
         this.adminErrorMessage = null;
         this.newAdmin = { fullName: '', email: '', password: '', phone: '' };
+        this.loadAdmins(); // ← refresh القايمة بعد الإضافة
       },
       error: (err) => {
         const message = err?.error || err?.message || 'حدث خطأ أثناء إنشاء الأدمن';
@@ -126,7 +126,10 @@ export class DashboardAdmin implements OnInit {
     });
   }
 
-  removeAdmin(id: number) { }
+  removeAdmin(id: string) {
+    // لو عندك endpoint للحذف
+    // this.dashboardService.deleteAdmin(id).subscribe(...)
+  }
 
   getRoleLabel(role: string): string {
     const labels: Record<string, string> = {
