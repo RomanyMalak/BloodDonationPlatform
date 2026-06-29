@@ -35,7 +35,7 @@ public sealed class AcceptBloodRequestCommandHandler
             await _dbContext.BloodRequests
             .Include(x => x.Acceptances)
             .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId,cancellationToken);
-            .FirstOrDefaultAsync(x => x.Id == request.BloodRequestId,cancellationToken);
+           
 
         if (bloodRequest is null)
             throw new NotFoundException("Blood request not found.");
